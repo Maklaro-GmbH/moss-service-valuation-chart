@@ -1,0 +1,23 @@
+{
+  "name": "moss-service-valuation-chart",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Maklaro-GmbH/moss-service-valuation-chart.git"
+  },
+  "author": "Przemyslaw Konefal",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Maklaro-GmbH/moss-service-valuation-chart/issues"
+  },
+  "homepage": "https://github.com/Maklaro-GmbH/moss-service-valuation-chart#readme",
+  "dependencies": {
+    "chart.js": "^2.9.3",
+    "chartjs-node-canvas": "^3.0.6"
+  }
+}

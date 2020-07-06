@@ -1,0 +1,234 @@
+{
+  "width": 800,
+  "height": 250,
+  "global": {
+    "defaultFontFamily": "Value"
+  },
+  "config": {
+    "type": "line",
+    "data": {
+      "labels": [
+        "06.2018",
+        "09.2018",
+        "12.2018",
+        "03.2019",
+        "06.2019",
+        "09.2019",
+        "12.2019",
+        "03.2020"
+      ],
+      "datasets": [
+        {
+          "label": "Kaufpreisentwicklung",
+          "data": [
+            {
+              "date": "06.2018",
+              "y": 636000
+            },
+            {
+              "date": "09.2018",
+              "y": 649000
+            },
+            {
+              "date": "12.2018",
+              "y": 661000
+            },
+            {
+              "date": "03.2019",
+              "y": 673000
+            },
+            {
+              "date": "06.2019",
+              "y": 680000
+            },
+            {
+              "date": "09.2019",
+              "y": 720000
+            },
+            {
+              "date": "12.2019",
+              "y": 725000
+            },
+            {
+              "date": "03.2020",
+              "y": 728000
+            }
+          ],
+          "fill": false,
+          "borderColor": "#0e74b6",
+          "backgroundColor": "#368cc2",
+          "lineTension": 0,
+          "borderWidth": 4,
+          "pointStyle": "line",
+          "pointRadius": 0,
+          "xAxisID": "x-axis",
+          "yAxisID": "left-y-axis"
+        },
+        {
+          "label": "Mietpreisentwicklung",
+          "data": [
+            {
+              "date": "06.2018",
+              "y": 3.73
+            },
+            {
+              "date": "09.2018",
+              "y": 4.13
+            },
+            {
+              "date": "12.2018",
+              "y": 4.17
+            },
+            {
+              "date": "03.2019",
+              "y": 4.2
+            },
+            {
+              "date": "06.2019",
+              "y": 4.33
+            },
+            {
+              "date": "09.2019",
+              "y": 4.3
+            },
+            {
+              "date": "12.2019",
+              "y": 4.44
+            }
+          ],
+          "fill": false,
+          "borderColor": "#0e74b6",
+          "backgroundColor": "#368cc2",
+          "lineTension": 0.1,
+          "borderWidth": 4,
+          "borderCapStyle": "round",
+          "borderDash": [
+            0,
+            10
+          ],
+          "borderDashOffset": [
+            0,
+            5
+          ],
+          "pointStyle": "line",
+          "pointRadius": 0,
+          "xAxisID": "x-axis",
+          "yAxisID": "right-y-axis",
+          "bezierCurve": false
+        }
+      ]
+    },
+    "options": {
+      "legend": {
+        "display": true,
+        "position": "bottom",
+        "align": "end",
+        "labels": {
+          "usePointStyle": true,
+          "boxWidth": 50,
+          "padding": 10,
+          "paddingRight": 0,
+          "fontColor": "rgba(0, 0, 0, 1)",
+          "fontFamily": "Value"
+        }
+      },
+      "scales": {
+        "xAxes": [
+          {
+            "id": "x-axis",
+            "display": true,
+            "position": "bottom",
+            "color": "rgba(150, 150, 150, 1)",
+            "scaleLabel": {
+              "display": true,
+              "fontColor": "rgba(0, 0, 0, 1)",
+              "fontFamily": "Value"
+            },
+            "gridLines": {
+              "display": false,
+              "drawBorder": false,
+              "drawOnChartArea": false,
+              "lineWidth": 1,
+              "tickMarkLength": 10,
+              "zeroLineWidth": 1,
+              "zeroLineColor": "rgba(150, 150, 150, 1)",
+              "color": "rgba(150, 150, 150, 1)"
+            },
+            "ticks": {
+              "maxTicksLimit": 8,
+              "maxRotation": 0,
+              "minRotation": 0,
+              "fontColor": "rgba(0, 0, 0, 1)",
+              "fontFamily": "Value",
+              "padding": 0
+            }
+          }
+        ],
+        "yAxes": [
+          {
+            "id": "left-y-axis",
+            "display": true,
+            "position": "left",
+            "color": "rgba(150, 150, 150, 1)",
+            "type": "linear",
+            "scaleLabel": {
+              "display": true,
+              "labelString": "Kaufpreis in \u20ac",
+              "align": "end",
+              "fontColor": "rgba(0, 0, 0, 1)",
+              "fontFamily": "Value",
+              "lineWidth": 1
+            },
+            "gridLines": {
+              "display": true,
+              "drawBorder": false,
+              "color": "rgba(150, 150, 150, 0.5)",
+              "offsetGridLines": false
+            },
+            "ticks": {
+              "beginAtZero": false,
+              "maxTicksLimit": 5,
+              "min": 600000,
+              "max": 800000,
+              "padding": 10,
+              "fontColor": "rgba(0, 0, 0, 1)",
+              "fontFamily": "Value"
+            }
+          },
+          {
+            "id": "right-y-axis",
+            "display": true,
+            "position": "right",
+            "color": "rgba(150, 150, 150, 1)",
+            "type": "linear",
+            "scaleLabel": {
+              "display": true,
+              "labelString": "Mietpreis pro m\u00b2 in \u20ac",
+              "align": "end",
+              "fontColor": "rgba(0, 0, 0, 1)",
+              "fontFamily": "Value"
+            },
+            "gridLines": {
+              "display": false,
+              "drawBorder": false,
+              "lineWidth": 1
+            },
+            "ticks": {
+              "beginAtZero": false,
+              "maxTicksLimit": 5,
+              "min": 2,
+              "max": 10,
+              "fontColor": "rgba(0, 0, 0, 1)",
+              "fontFamily": "Value"
+            }
+          }
+        ]
+      },
+      "elements": {
+        "point": {
+          "radius": 0
+        }
+      }
+    }
+  }
+}
