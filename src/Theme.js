@@ -18,10 +18,6 @@ class Theme {
 
         let originalDrawTitle = this.chart.Scale.prototype._drawTitle
         this.chart.Scale.prototype._drawTitle = function () {
-            if (this.id === 'right-axis') {
-                // console.log(this)
-            }
-
             let me = this;
             let ctx = me.ctx;
             let options = me.options;

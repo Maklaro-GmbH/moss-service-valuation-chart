@@ -1,5 +1,4 @@
 const { CanvasRenderService } = require('chartjs-node-canvas')
-//const ChartJsFactory = require('./ChartJsFactory')
 const Theme = require('./Theme')
 const ticks = require('./plugins/ticks')
 
@@ -30,7 +29,6 @@ class Charts {
 
     setCanvasService() {
         if (!this.canvasService) {
-            //this.canvasService = new CanvasRenderService(this.width, this.height, undefined, undefined, ChartJsFactory)
             this.canvasService = new CanvasRenderService(this.width, this.height, undefined, undefined, () => {
                 let ChartJS = require('chart.js')
 
@@ -64,7 +62,7 @@ class Charts {
         }
     }
 
-    async get() {
+    get() {
         return this.canvasService.renderToBuffer(this.config)
     }
 
