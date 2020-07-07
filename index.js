@@ -5,7 +5,9 @@ const fs = require("fs");
 
 const saveChartBuffer = async data => {
     const chartBuffer = await charts.get(data);
-    fs.writeFile("resultChart.png", chartBuffer, () => {})
+    if (Buffer.isBuffer(chartBuffer)) {
+       fs.writeFile("resultChart.png", chartBuffer, () => {})
+    }
 }
 
 

@@ -1,14 +1,16 @@
 const { CanvasRenderService } = require('chartjs-node-canvas')
 const Theme = require('./Theme')
 const ticks = require('./plugins/ticks')
+const chartGeneratorConfig = require('./config/chartGeneratorConfig');
+const fontsList = require('./fonts/index');
 
 class Charts {
 
     constructor(req) {
-        this.width = req.width ? req.width : 600
-        this.height = req.height ? req.height : 350
-        this.global = req.global ? req.global : null
-        this.config = req.config
+        this.width = req.width
+        this.height = req.height
+        this.global = { defaultFontFamily: req.fontFamily };
+        this.config = { ...chartGeneratorConfig, data: req.data }
 
         this.prepareOptions()
         this.setAxesTicks()
@@ -25,6 +27,13 @@ class Charts {
                 this.config.options[i] = options[i]
             }
         }
+    }
+
+    registerFonts() {
+        fontsList.forEach(font => {
+            const fontPath = `${__dirname}/./fonts/${font.fontFileName}`
+            this.canvasService.registerFont(fontPath, { family: font.fontName })
+        })
     }
 
     setCanvasService() {
@@ -48,17 +57,7 @@ class Charts {
                 return ChartJS
             })
 
-            this.canvasService.registerFont(__dirname + '/./fonts/Value-Regular.ttf', {family: 'Value'})
-            this.canvasService.registerFont(__dirname + '/./fonts/Frutiger-Regular.ttf', {family: 'Frutiger'})
-            this.canvasService.registerFont(__dirname + '/./fonts/Frutiger-Bold.ttf', {family: 'Frutiger Bold'})
-            this.canvasService.registerFont(__dirname + '/./fonts/SparBd.ttf', {family: 'Spar Bold'})
-            this.canvasService.registerFont(__dirname + '/./fonts/SparRg.ttf', {family: 'Spar'})
-            this.canvasService.registerFont(__dirname + '/./fonts/MinionPro-Regular.ttf', {family: 'MinionPro'})
-            this.canvasService.registerFont(__dirname + '/./fonts/MinionPro-Bold.ttf', {family: 'MinionPro Bold'})
-            this.canvasService.registerFont(__dirname + '/./fonts/Segoe-UI.ttf', {family: 'Segoe UI'})
-            this.canvasService.registerFont(__dirname + '/./fonts/Segoe-UI-Bold.ttf', {family: 'Segoe UI Bold'})
-            this.canvasService.registerFont(__dirname + '/./fonts/Segoe-UI-Bold-Italic.ttf', {family: 'Segoe UI Bold Italic'})
-            this.canvasService.registerFont(__dirname + '/./fonts/Segoe-UI-Italic.ttf', {family: 'Segoe UI Italic'})
+            this.registerFonts();
         }
     }
 

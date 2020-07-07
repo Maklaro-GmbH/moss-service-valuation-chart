@@ -1,6 +1,7 @@
 {
   "width": 800,
   "height": 250,
+  "fontFamily": "Frutiger",
   "data": {
     "labels": [
       "09.2012",
