@@ -12,4 +12,5 @@ const fontsList = [
     { fontName: "Segoe UI Bold Italic", fontFileName: "Segoe-UI-Bold-Italic.ttf"},
     { fontName: "Segoe UI Italic", fontFileName: "Segoe-UI-Italic.ttf"},
 ]
+
 module.exports = fontsList;
