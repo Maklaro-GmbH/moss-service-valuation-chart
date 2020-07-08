@@ -2,6 +2,7 @@ const { CanvasRenderService } = require("chartjs-node-canvas");
 const Theme = require("./Theme");
 const ticks = require("./plugins/ticks");
 const chartGeneratorConfig = require("./config/chartGeneratorConfig");
+const datasetStyling = require("./config/datasetStyling");
 const fontsList = require("./fonts/index");
 
 class Charts {
@@ -9,15 +10,20 @@ class Charts {
     this.width = req.width;
     this.height = req.height;
     this.global = { defaultFontFamily: req.fontFamily };
-    req.data.datasets = this.transformDatasets(req.data.datasets);
-    this.config = { ...chartGeneratorConfig, data: req.data };
+    this.config = {
+      ...chartGeneratorConfig,
+      data: {
+        ...req.data,
+        datasets: this.transformDatasets(req.data.datasets),
+      },
+    };
 
     this.setAxesTicks();
     this.setCanvasService();
   }
 
   transformDatasets(datasets) {
-    return datasets.map((dataset) => {});
+    return datasets.map((dataset) => ({ ...dataset, ...datasetStyling }));
   }
 
   registerFonts() {

@@ -1,5 +1,5 @@
 {
-  "width": 600,
+  "width": 800,
   "height": 250,
   "fontFamily": "Segoe UI",
   "data": {
@@ -39,6 +39,9 @@
     "datasets": [
       {
         "label": "Kaufpreisentwicklung",
+        "lineTension": 0,
+        "xAxisID": "x-axis",
+        "yAxisID": "left-y-axis",
         "data": [
           {
             "date": "09.2012",

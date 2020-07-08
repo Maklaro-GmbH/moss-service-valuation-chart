@@ -17,30 +17,7 @@ const chartGeneratorConfig = {
       xAxes: [
         {
           id: "x-axis",
-          display: true,
           position: "bottom",
-          color: "rgba(150, 150, 150, 1)",
-          scaleLabel: {
-            display: true,
-            fontColor: "rgba(0, 0, 0, 1)",
-          },
-          gridLines: {
-            display: false,
-            drawBorder: false,
-            drawOnChartArea: false,
-            lineWidth: 1,
-            tickMarkLength: 10,
-            zeroLineWidth: 1,
-            zeroLineColor: "rgba(150, 150, 150, 1)",
-            color: "rgba(150, 150, 150, 1)",
-          },
-          ticks: {
-            maxTicksLimit: 8,
-            maxRotation: 0,
-            minRotation: 0,
-            fontColor: "rgba(0, 0, 0, 1)",
-            padding: 0,
-          },
         },
       ],
       yAxes: [
@@ -66,7 +43,7 @@ const chartGeneratorConfig = {
           ticks: {
             beginAtZero: false,
             maxTicksLimit: 5,
-            min: 600000,
+            min: 400000,
             max: 800000,
             padding: 10,
             fontColor: "rgba(0, 0, 0, 1)",

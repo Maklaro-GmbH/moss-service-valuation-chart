@@ -33,6 +33,7 @@ class ChartsController {
       (dataset) =>
         typeof dataset !== "object" ||
         typeof dataset.label !== "string" ||
+        typeof dataset.xAxisID !== "string" ||
         !Array.isArray(dataset.data)
     );
     if (isSomeDataRecordWithInvalidStructure)
