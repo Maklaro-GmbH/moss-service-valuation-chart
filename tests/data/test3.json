@@ -1,7 +1,11 @@
 {
   "width": 800,
   "height": 250,
-  "fontFamily": "Segoe UI",
+  "styling": {
+    "fontFamily": "Segoe UI",
+    "fontSize": 12,
+    "fontColor": "#666"
+  },
   "data": {
     "labels": [
       "09.2012",
@@ -39,9 +43,6 @@
     "datasets": [
       {
         "label": "Kaufpreisentwicklung",
-        "lineTension": 0,
-        "xAxisID": "x-axis",
-        "yAxisID": "left-y-axis",
         "data": [
           {
             "date": "09.2012",
@@ -167,7 +168,16 @@
             "date": "03.2020",
             "y": 728000
           }
-        ]
+        ],
+        "yAxis": {
+          "position": "left",
+          "label": "Kaufpreis in \u20ac",
+          "ticks": {
+            "maxTicksLimit": 6,
+            "min": 400000,
+            "max": 800000
+          }
+        }
       }
     ]
   }

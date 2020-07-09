@@ -1,9 +1,9 @@
 const xAxeBaseProps = {
+  id: 'x-axis',
   display: true,
-  color: "rgba(150, 150, 150, 1)",
+  position: 'bottom',
   scaleLabel: {
-    display: true,
-    fontColor: "rgba(0, 0, 0, 1)",
+    display: true
   },
   gridLines: {
     display: false,
@@ -12,16 +12,15 @@ const xAxeBaseProps = {
     lineWidth: 1,
     tickMarkLength: 10,
     zeroLineWidth: 1,
-    zeroLineColor: "rgba(150, 150, 150, 1)",
-    color: "rgba(150, 150, 150, 1)",
+    zeroLineColor: 'rgba(150, 150, 150, 1)',
+    color: 'rgba(150, 150, 150, 1)'
   },
   ticks: {
     maxTicksLimit: 8,
     maxRotation: 0,
     minRotation: 0,
-    fontColor: "rgba(0, 0, 0, 1)",
-    padding: 0,
-  },
-};
+    padding: 0
+  }
+}
 
-module.exports = xAxeBaseProps;
+module.exports = xAxeBaseProps

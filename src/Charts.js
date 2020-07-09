@@ -1,36 +1,65 @@
-const { CanvasRenderService } = require("chartjs-node-canvas");
-const Theme = require("./Theme");
-const ticks = require("./plugins/ticks");
-const chartGeneratorConfig = require("./config/chartGeneratorConfig");
-const datasetStyling = require("./config/datasetStyling");
-const fontsList = require("./fonts/index");
+const { CanvasRenderService } = require('chartjs-node-canvas')
+const Theme = require('./Theme')
+const ticks = require('./plugins/ticks')
+const chartGeneratorConfig = require('./config/chartGeneratorConfig')
+const datasetBaseProps = require('./config/datasetBaseProps')
+const yAxeBaseProps = require('./config/yAxeBaseProps')
+const scaleLabelBaseProps = require('./config/scaleLabelBaseProps')
+const fontsList = require('./fonts/index')
 
 class Charts {
   constructor(req) {
-    this.width = req.width;
-    this.height = req.height;
-    this.global = { defaultFontFamily: req.fontFamily };
+    this.width = req.width
+    this.height = req.height
+    this.global = {
+      defaultFontFamily: req.styling.fontFamily,
+      defaultFontSize: req.styling.fontSize,
+      defaultFontColor: req.styling.fontColor
+    }
     this.config = {
       ...chartGeneratorConfig,
       data: {
         ...req.data,
-        datasets: this.transformDatasets(req.data.datasets),
+        datasets: this.transformDatasets(req.data.datasets)
       },
-    };
+      options: {
+        ...chartGeneratorConfig.options,
+        scales: {
+          ...chartGeneratorConfig.options.scales,
+          yAxes: this.formYAxesFromDatasets(req.data.datasets)
+        }
+      }
+    }
 
-    this.setAxesTicks();
-    this.setCanvasService();
+    this.setAxesTicks()
+    this.setCanvasService()
+  }
+
+  formYAxesFromDatasets(datasets) {
+    return datasets.map(({ yAxis: { label, ...yAxis } }, index) => ({
+      ...yAxis,
+      ...yAxeBaseProps,
+      scaleLabel: {
+        labelString: label,
+        ...scaleLabelBaseProps
+      },
+      id: `y-axis-${index}`
+    }))
   }
 
   transformDatasets(datasets) {
-    return datasets.map((dataset) => ({ ...dataset, ...datasetStyling }));
+    return datasets.map(({ yAxis, ...dataset }, index) => ({
+      ...dataset,
+      ...datasetBaseProps,
+      yAxisID: `y-axis-${index}`
+    }))
   }
 
   registerFonts() {
     fontsList.forEach((font) => {
-      const fontPath = `${__dirname}/./fonts/${font.fontFileName}`;
-      this.canvasService.registerFont(fontPath, { family: font.fontName });
-    });
+      const fontPath = `${__dirname}/./fonts/${font.fontFileName}`
+      this.canvasService.registerFont(fontPath, { family: font.fontName })
+    })
   }
 
   setCanvasService() {
@@ -41,31 +70,32 @@ class Charts {
         undefined,
         undefined,
         () => {
-          let ChartJS = require("chart.js");
+          let ChartJS = require('chart.js')
 
-          ChartJS.defaults.global.devicePixelRatio = 2;
-          ChartJS.plugins.register(ticks);
+          ChartJS.defaults.global.devicePixelRatio = 2
+          ChartJS.plugins.register(ticks)
 
           if (this.global) {
             for (let i in this.global) {
-              ChartJS.defaults.global[i] = this.global[i];
+              ChartJS.defaults.global[i] = this.global[i]
             }
           }
 
-          let theme = new Theme(ChartJS);
-          theme.init();
+          let theme = new Theme(ChartJS)
+          theme.init()
 
-          delete require.cache[require.resolve("chart.js")];
-          return ChartJS;
+          delete require.cache[require.resolve('chart.js')]
+          return ChartJS
         }
-      );
+      )
 
-      this.registerFonts();
+      this.registerFonts()
     }
   }
 
   get() {
-    return this.canvasService.renderToBuffer(this.config);
+    console.log(this.config.data.datasets, this.config.options.scales)
+    return this.canvasService.renderToBuffer(this.config)
   }
 
   setAxesTicks() {
@@ -75,37 +105,37 @@ class Charts {
       this.config.options.scales.yAxes !== undefined &&
       this.config.options.scales.yAxes.length
     ) {
-      this.config.options.scales.yAxes.map((item, i) => {
+      this.config.options.scales.yAxes.map((item) => {
         if (item.ticks !== undefined) {
-          if (item.id === "left-y-axis") {
+          if (item.id === 'left-y-axis') {
             item.ticks.callback = (value) => {
               return value
                 .toLocaleString(undefined, {
                   minimumFractionDigits: 0,
-                  maximumFractionDigits: 0,
+                  maximumFractionDigits: 0
                 })
-                .replace(/,/g, ".");
-            };
+                .replace(/,/g, '.')
+            }
           }
 
-          if (item.id === "right-y-axis") {
-            item.ticks.callback = (value, index, values) => {
+          if (item.id === 'right-y-axis') {
+            item.ticks.callback = (value) => {
               if (value % 1 === 0) {
-                return value.toString() + ",-";
+                return value.toString() + ',-'
               } else {
                 return value
                   .toLocaleString(undefined, {
                     minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
+                    maximumFractionDigits: 2
                   })
-                  .replace(".", ",");
+                  .replace('.', ',')
               }
-            };
+            }
           }
         }
-      });
+      })
     }
   }
 }
 
-module.exports = Charts;
+module.exports = Charts

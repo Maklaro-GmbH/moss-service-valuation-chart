@@ -1,20 +1,21 @@
-const fontsList = require("../fonts/index");
+const fontsList = require('../fonts/index')
 
 const messages = {
-  missingPayload: "Missing payload object",
   invalidType: (paramName, paramType) =>
     `Missing '${paramName}' param of ${paramType} type`,
   invalidFontFamily: `Missing 'fontFamily' param of one of the following values: ${fontsList
     .map(({ fontName }) => fontName)
-    .join(", ")}`,
+    .join(', ')}`,
   notAcceptedParamsPassed: (objectName, availableFieldsList) =>
-    `${objectName} must only contain following fields: [${availableFieldsList.join(
-      ", "
+    `${objectName} must contain following fields: [${availableFieldsList.join(
+      ', '
     )}]`,
-  invalidDataRecordStructure:
-    "Each record of 'datasets' array must be an object containing 'label' param of string  type and 'data' array param (list of actual data records)",
-  arrayRecordWithWrongType: (arrayName, arrayType) =>
+  arrayRecordOfWrongType: (arrayName, arrayType) =>
     `${arrayName} must only contain values of ${arrayType} type.`,
-};
+  outOfEnumsRange: (paramName, enumsList) =>
+    `${paramName} must be oe one of the following values: [${enumsList.join(
+      ', '
+    )}]`
+}
 
-module.exports = messages;
+module.exports = messages
