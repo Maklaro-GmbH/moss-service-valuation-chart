@@ -7,7 +7,7 @@ class ChartsController {
   get(req) {
     try {
       this.validatePayload(req)
-      let chart = new ChartsService(req)
+      const chart = new ChartsService(req)
 
       return chart
         .get()

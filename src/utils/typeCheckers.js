@@ -3,7 +3,8 @@ const messages = require('../constants/messages')
 const typeCheckers = {
   isNumber: (value) => typeof value === 'number',
   isString: (value) => typeof value === 'string',
-  isObject: (value) => !!value && typeof value === 'object',
+  isObject: (value) =>
+    !!value && !Array.isArray(value) && typeof value === 'object',
   isArray: (value) => Array.isArray(value),
   isInEnumsRange: (value, enumsList) => enumsList.includes(value),
   checkRequiredParamsArePassed: (

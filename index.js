@@ -1,18 +1,17 @@
 const charts = require('./src/controllers/ChartsController')
-const testData = require('./tests/data/test3.json')
-const fs = require('fs')
 
-const saveChartBuffer = async (data) => {
-  try {
-    const chartBuffer = await charts.get(data)
-    if (Buffer.isBuffer(chartBuffer)) {
-      fs.writeFile('./tests/result/test3.png', chartBuffer, () => {})
-      return 0
+const generateChart = (payload) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const dataParsed = JSON.parse(payload)
+      const chartBuffer = await charts.get(dataParsed)
+
+      if (Buffer.isBuffer(chartBuffer)) resolve(chartBuffer)
+      else resolve(`Error: ${chartBuffer}`)
+    } catch (e) {
+      reject(e)
     }
-    return 1
-  } catch {
-    return 1
-  }
+  })
 }
 
-return saveChartBuffer(testData)
+module.exports = generateChart

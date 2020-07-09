@@ -94,7 +94,6 @@ class Charts {
   }
 
   get() {
-    console.log(this.config.data.datasets, this.config.options.scales)
     return this.canvasService.renderToBuffer(this.config)
   }
 
