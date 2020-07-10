@@ -37,7 +37,11 @@ interface IData {
 interface IDatasets {
   label: string;
   yAxis: IYAxis;
-  data: string[];
+  data: IDataRecord[];
+}
+interface IDataRecord {
+  [key: string]: string; // value on x Axis
+  y: number
 }
 
 interface IYAxis {

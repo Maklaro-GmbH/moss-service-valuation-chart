@@ -3,7 +3,8 @@ const xAxeBaseProps = {
   display: true,
   position: 'bottom',
   scaleLabel: {
-    display: true
+    display: true,
+    fontColor: 'rgba(0, 0, 0, 1)'
   },
   gridLines: {
     display: false,
