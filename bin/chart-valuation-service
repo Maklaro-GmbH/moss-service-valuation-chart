@@ -1,18 +1,21 @@
 #!/usr/bin/env node
 
-const readline = require('readline').createInterface({
-  input: process.stdin,
-  output: process.stdout
-})
-const generateChart = require('../generateChart2.js')
-const json = require('../tests/data/test3.json')
-let output = null
+const fs = require('fs');
+const generateChart = require('../index.js')
 
-readline.question(``, async (JsonAsString) => {
-  output = await generateChart(JsonAsString)
-  console.log(output)
-  readline.close()
-})
+const jsonAsString = fs.readFileSync("/dev/stdin", "utf-8");
 
-return output
-
+const outputPromise = generateChart(jsonAsString);
+outputPromise
+    .then(
+        (buffer) => {
+            process.stdout.write(buffer);
+            process.exit(0);
+        }
+    )
+    .catch(
+        (error) => {
+            process.stderr.write(error);
+            process.exit(1);
+        }
+    );

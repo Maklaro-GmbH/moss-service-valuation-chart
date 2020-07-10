@@ -19,12 +19,6 @@ const ticks = {
             _set: function(scope, values) {
                 return helpers_core.merge(this[scope] || (this[scope] = {}), values);
             },
-            defaultColor: 'rgba(0,0,0,0.1)',
-            defaultFontColor: '#666',
-            defaultFontFamily: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
-            defaultFontSize: 12,
-            defaultFontStyle: 'normal',
-            defaultLineHeight: 1.2,
             showLines: true
         }
 

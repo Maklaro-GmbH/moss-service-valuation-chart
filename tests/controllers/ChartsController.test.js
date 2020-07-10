@@ -1,5 +1,5 @@
 const chartsController = require('../../src/controllers/ChartsController')
-const test_payload = require('../data/test1.json')
+const test_payload = require('../fixtures/test1.json')
 const messages = require('../../src/constants/messages')
 
 describe('ChartsController class', function () {

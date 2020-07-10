@@ -1,0 +1,9 @@
+version: '3.7'
+
+services:
+  node:
+    container_name: moss-service-valuation-chart-node
+    build:
+      context: .docker/dev/node
+    volumes:
+      - ./:/app

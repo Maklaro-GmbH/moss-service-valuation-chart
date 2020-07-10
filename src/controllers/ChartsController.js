@@ -1,5 +1,4 @@
 const ChartsService = require('../Charts')
-const fontsList = require('../fonts/index')
 const messages = require('../constants/messages')
 const typeCheckers = require('../utils/typeCheckers')
 
@@ -83,11 +82,6 @@ class ChartsController {
     const REQUIRED_STYLING_PARAMS = ['fontFamily', 'fontSize', 'fontColor']
 
     typeCheckers.checkRequiredParamsArePassed(stylingObject, REQUIRED_STYLING_PARAMS, 'styling')
-    if (!fontsList.some(({ fontName }) => stylingObject.fontFamily === fontName))
-      throw messages.outOfEnumsRange(
-        'styling.fontFamily',
-        fontsList.map(({ fontName }) => fontName)
-      )
     if (!typeCheckers.isNumber(stylingObject.fontSize))
       throw messages.invalidType('styling.fontSize', 'number')
     if (!typeCheckers.isString(stylingObject.fontColor))

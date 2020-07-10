@@ -1,20 +1,28 @@
 # Maklaro valuation-chart-service
 
-Contains chart-node-canvas chartjs implementation.
+Contains chart-node-canvas ChartJS implementation.
 
 ## Docker
 
 ```bash
-docker build --tag chart-service .
-docker run -it chart-service bash
+docker-compose build
+docker-compose run --rm --user 1000:1000 node yarn install --frozen-lockfile
 ```
 
 ## Run bin exec file
 
 ```bash
-./bin/chart-valuation-service
+docker-compose run --rm --user 1000:1000 node bin/chart-valuation-service [json]
 ```
-In order to generate chart, pass JSON structured as IPayload interface to the chart-valuation-service script:
+
+## Test the service
+
+```bash
+docker-compose run --rm --user 1000:1000 node bin/chart-valuation-service < tests/data/test1.json > chart.png
+```
+
+In order to generate the chart, pass JSON structured as IPayload interface to the chart-valuation-service script:
+
 ```typescript
 interface IPayload {
   width: number;
@@ -54,5 +62,4 @@ interface IYAxis {
   }
 }
 ```
-You can find the example payloads in /src/tests/data
-To generate & save images from those examples run ./tests/generateChar1.js or ./tests/generateChar2.js with node
+You can find the example payloads in /src/tests/fixtures/payload

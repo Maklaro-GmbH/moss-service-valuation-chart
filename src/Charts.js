@@ -5,7 +5,6 @@ const chartGeneratorConfig = require('./config/chartGeneratorConfig')
 const datasetBaseProps = require('./config/datasetBaseProps')
 const yAxeBaseProps = require('./config/yAxeBaseProps')
 const scaleLabelBaseProps = require('./config/scaleLabelBaseProps')
-const fontsList = require('./fonts/index')
 
 class Charts {
   constructor(req) {
@@ -16,6 +15,7 @@ class Charts {
 
     this.setAxesTicks()
     this.setCanvasService()
+    this.registerFont(req)
   }
 
   formConfig(req) {
@@ -37,7 +37,7 @@ class Charts {
 
   formGlobal({ styling }) {
     return {
-      defaultFontFamily: styling.fontFamily,
+      defaultFontFamily: 'font-family',
       defaultFontSize: styling.fontSize,
       defaultFontColor: styling.fontColor
     }
@@ -63,11 +63,8 @@ class Charts {
     }))
   }
 
-  registerFonts() {
-    fontsList.forEach((font) => {
-      const fontPath = `${__dirname}/./fonts/${font.fontFileName}`
-      this.canvasService.registerFont(fontPath, { family: font.fontName })
-    })
+  registerFont(req) {
+    this.canvasService.registerFont(req.styling.fontFamily, { family: 'font-family' })
   }
 
   setCanvasService() {
@@ -96,8 +93,6 @@ class Charts {
           return ChartJS
         }
       )
-
-      this.registerFonts()
     }
   }
 
