@@ -1,21 +1,50 @@
 const { CanvasRenderService } = require('chartjs-node-canvas')
+const validate = require('jsonschema').validate
+const ChartJS = require('chart.js')
+
 const Theme = require('./Theme')
 const ticks = require('./plugins/ticks')
 const chartGeneratorConfig = require('./config/chartGeneratorConfig')
 const datasetBaseProps = require('./config/datasetBaseProps')
 const yAxeBaseProps = require('./config/yAxeBaseProps')
 const scaleLabelBaseProps = require('./config/scaleLabelBaseProps')
+const payloadSchema = require('./schemas/payload')
 
 class Charts {
   constructor(req) {
-    this.width = req.width
-    this.height = req.height
+    this.validateSchema(req)
+
+    ChartJS.plugins.register(ticks)
+
+    this.setServiceGlobalDefaults(ChartJS, req.styling)
+    this.addChartTheming(ChartJS)
+
     this.global = this.formGlobal(req)
     this.config = this.formConfig(req)
 
-    this.setAxesTicks()
     this.setCanvasService()
-    this.registerFont(req)
+  }
+
+  validateSchema(req) {
+    const validationResult = validate(req, payloadSchema)
+    const hasErrors = !!validationResult.length
+    if (hasErrors) {
+      throw validationResult
+    }
+    return true
+  }
+
+  setServiceGlobalDefaults(chartJsInstance, config) {
+    chartJsInstance.defaults.global = {
+      ...chartJsInstance.defaults.global,
+      ...config,
+      devicePixelRatio: 2
+    }
+  }
+
+  addChartTheming(chartJsInstance) {
+    const theme = new Theme(chartJsInstance)
+    theme.init()
   }
 
   formConfig(req) {
@@ -63,37 +92,20 @@ class Charts {
     }))
   }
 
-  registerFont(req) {
-    this.canvasService.registerFont(req.styling.fontFamily, { family: 'font-family' })
+  registerFont(canvasService, req) {
+    canvasService.registerFont(req.styling.fontPath, { family: 'font-family' })
   }
 
-  setCanvasService() {
-    if (!this.canvasService) {
-      this.canvasService = new CanvasRenderService(
-        this.width,
-        this.height,
-        undefined,
-        undefined,
-        () => {
-          let ChartJS = require('chart.js')
-
-          ChartJS.defaults.global.devicePixelRatio = 2
-          ChartJS.plugins.register(ticks)
-
-          if (this.global) {
-            for (let i in this.global) {
-              ChartJS.defaults.global[i] = this.global[i]
-            }
-          }
-
-          let theme = new Theme(ChartJS)
-          theme.init()
-
-          delete require.cache[require.resolve('chart.js')]
-          return ChartJS
-        }
-      )
-    }
+  setCanvasService(chartJsInstance, req) {
+    const canvasService = new CanvasRenderService(
+      req.width,
+      req.height,
+      undefined,
+      undefined,
+      () => chartJsInstance
+    )
+    this.registerFont(canvasService, req)
+    this.setAxesTicks(req, canvasService)
   }
 
   get() {

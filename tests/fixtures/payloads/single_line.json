@@ -2,7 +2,7 @@
   "width": 800,
   "height": 250,
   "styling": {
-    "fontFamily": "/app/tests/fixtures/fonts/Frutiger-Regular.ttf",
+    "fontPath": "/app/tests/fixtures/fonts/Frutiger-Regular.ttf",
     "fontSize": 12,
     "fontColor": "#000"
   },
