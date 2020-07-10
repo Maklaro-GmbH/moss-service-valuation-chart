@@ -45,7 +45,7 @@ interface IDataRecord {
 }
 
 interface IYAxis {
-  position: string;
+  position: 'left' | 'right';
   label: string;
   ticks: {
     maxTicksLimit: number;

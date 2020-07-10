@@ -22,6 +22,7 @@ class ChartsController {
     if (!typeCheckers.isArray(labelsArray)) throw messages.invalidType('data.labels', 'array')
     if (labelsArray.some((label) => !typeCheckers.isString(label)))
       throw messages.arrayRecordOfWrongType('data.labels', 'string')
+    return true
   }
 
   validateTicksConfig(ticksConfig, containingAxisPath) {
@@ -35,6 +36,7 @@ class ChartsController {
       throw messages.invalidType(`${ticksConfigPath}.min`, 'number')
     if (!typeCheckers.isNumber(ticksConfig.max))
       throw messages.invalidType(`${ticksConfigPath}.max`, 'number')
+    return true
   }
 
   validateYAxisConfig(yAxisConfig, containingDatasetPath) {
@@ -48,32 +50,38 @@ class ChartsController {
     if (!typeCheckers.isString(yAxisConfig.label))
       throw messages.invalidType(`${axisPath}.label`, 'string')
     this.validateTicksConfig(yAxisConfig.ticks, axisPath)
+    return true
   }
 
   validateDataset(datasetObject, index) {
     const REQUIRED_DATASET_PARAMS = ['label', 'data', 'yAxis']
     const datasetPath = `data.datasets[${index}]`
+
     typeCheckers.checkRequiredParamsArePassed(datasetObject, REQUIRED_DATASET_PARAMS, datasetPath)
     if (!typeCheckers.isString(datasetObject.label))
-      throw messages.invalidType(`${datasetPath}.label`)
+      throw messages.invalidType(`${datasetPath}.label`, 'string')
     this.validateYAxisConfig(datasetObject.yAxis, datasetPath)
+    return true
   }
 
   validateDatasetsArray(datasetsArray) {
     if (!typeCheckers.isArray(datasetsArray)) throw messages.invalidType('data.datasets', 'array')
     datasetsArray.forEach((dataset, index) => this.validateDataset(dataset, index))
+    return true
   }
 
   validateDataObject(dataObject) {
     const REQUIRED_DATA_PARAMS = ['labels', 'datasets']
-    typeCheckers.checkRequiredParamsArePassed(dataObject, REQUIRED_DATA_PARAMS, 'data')
 
+    typeCheckers.checkRequiredParamsArePassed(dataObject, REQUIRED_DATA_PARAMS, 'data')
     this.validateLabelsArray(dataObject.labels)
     this.validateDatasetsArray(dataObject.datasets)
+    return true
   }
 
   validateStylingObject(stylingObject) {
     const REQUIRED_STYLING_PARAMS = ['fontFamily', 'fontSize', 'fontColor']
+
     typeCheckers.checkRequiredParamsArePassed(stylingObject, REQUIRED_STYLING_PARAMS, 'styling')
     if (!fontsList.some(({ fontName }) => stylingObject.fontFamily === fontName))
       throw messages.outOfEnumsRange(
@@ -84,15 +92,18 @@ class ChartsController {
       throw messages.invalidType('styling.fontSize', 'number')
     if (!typeCheckers.isString(stylingObject.fontColor))
       throw messages.invalidType('styling.fontColor', 'string')
+    return true
   }
 
   validatePayload(payload) {
     const REQUIRED_PAYLOAD_PARAMS = ['width', 'height', 'styling', 'data']
+
     typeCheckers.checkRequiredParamsArePassed(payload, REQUIRED_PAYLOAD_PARAMS, 'payload')
     if (!typeCheckers.isNumber(payload.width)) throw messages.invalidType('width', 'number')
     if (!typeCheckers.isNumber(payload.height)) throw messages.invalidType('height', 'number')
     this.validateStylingObject(payload.styling)
     this.validateDataObject(payload.data)
+    return true
   }
 }
 

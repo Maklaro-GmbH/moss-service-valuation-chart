@@ -11,12 +11,15 @@ class Charts {
   constructor(req) {
     this.width = req.width
     this.height = req.height
-    this.global = {
-      defaultFontFamily: req.styling.fontFamily,
-      defaultFontSize: req.styling.fontSize,
-      defaultFontColor: req.styling.fontColor
-    }
-    this.config = {
+    this.global = this.formGlobal(req)
+    this.config = this.formConfig(req)
+
+    this.setAxesTicks()
+    this.setCanvasService()
+  }
+
+  formConfig(req) {
+    return {
       ...chartGeneratorConfig,
       data: {
         ...req.data,
@@ -30,9 +33,14 @@ class Charts {
         }
       }
     }
+  }
 
-    this.setAxesTicks()
-    this.setCanvasService()
+  formGlobal({ styling }) {
+    return {
+      defaultFontFamily: styling.fontFamily,
+      defaultFontSize: styling.fontSize,
+      defaultFontColor: styling.fontColor
+    }
   }
 
   formYAxesFromDatasets(datasets) {

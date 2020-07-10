@@ -4,7 +4,7 @@
   "styling": {
     "fontFamily": "Segoe UI",
     "fontSize": 12,
-    "fontColor": "#666"
+    "fontColor": "#000"
   },
   "data": {
     "labels": [
