@@ -1,102 +1,148 @@
 const { CanvasRenderService } = require('chartjs-node-canvas')
-//const ChartJsFactory = require('./ChartJsFactory')
 const Theme = require('./Theme')
 const ticks = require('./plugins/ticks')
+const chartGeneratorConfig = require('./config/chartGeneratorConfig')
+const datasetBaseProps = require('./config/datasetBaseProps')
+const yAxeBaseProps = require('./config/yAxeBaseProps')
+const scaleLabelBaseProps = require('./config/scaleLabelBaseProps')
+const fontsList = require('./fonts/index')
 
 class Charts {
+  constructor(req) {
+    this.width = req.width
+    this.height = req.height
+    this.global = this.formGlobal(req)
+    this.config = this.formConfig(req)
 
-    constructor(req) {
-        this.width = req.width ? req.width : 600
-        this.height = req.height ? req.height : 350
-        this.global = req.global ? req.global : null
-        this.config = req.config
+    this.setAxesTicks()
+    this.setCanvasService()
+  }
 
-        this.prepareOptions()
-        this.setAxesTicks()
-        this.setCanvasService()
+  formConfig(req) {
+    return {
+      ...chartGeneratorConfig,
+      data: {
+        ...req.data,
+        datasets: this.transformDatasets(req.data.datasets)
+      },
+      options: {
+        ...chartGeneratorConfig.options,
+        scales: {
+          ...chartGeneratorConfig.options.scales,
+          yAxes: this.formYAxesFromDatasets(req.data.datasets)
+        }
+      }
     }
+  }
 
-    prepareOptions() {
-        if (typeof this.config.options === 'undefined') {
-            this.config.options = {}
-        } else {
-            let options = this.config.options
-            this.config.options = {}
-            for (let i in options) {
-                this.config.options[i] = options[i]
+  formGlobal({ styling }) {
+    return {
+      defaultFontFamily: styling.fontFamily,
+      defaultFontSize: styling.fontSize,
+      defaultFontColor: styling.fontColor
+    }
+  }
+
+  formYAxesFromDatasets(datasets) {
+    return datasets.map(({ yAxis: { label, ...yAxis } }, index) => ({
+      ...yAxis,
+      ...yAxeBaseProps,
+      scaleLabel: {
+        labelString: label,
+        ...scaleLabelBaseProps
+      },
+      id: `y-axis-${index}`
+    }))
+  }
+
+  transformDatasets(datasets) {
+    return datasets.map(({ yAxis, ...dataset }, index) => ({
+      ...dataset,
+      ...datasetBaseProps,
+      yAxisID: `y-axis-${index}`
+    }))
+  }
+
+  registerFonts() {
+    fontsList.forEach((font) => {
+      const fontPath = `${__dirname}/./fonts/${font.fontFileName}`
+      this.canvasService.registerFont(fontPath, { family: font.fontName })
+    })
+  }
+
+  setCanvasService() {
+    if (!this.canvasService) {
+      this.canvasService = new CanvasRenderService(
+        this.width,
+        this.height,
+        undefined,
+        undefined,
+        () => {
+          let ChartJS = require('chart.js')
+
+          ChartJS.defaults.global.devicePixelRatio = 2
+          ChartJS.plugins.register(ticks)
+
+          if (this.global) {
+            for (let i in this.global) {
+              ChartJS.defaults.global[i] = this.global[i]
             }
+          }
+
+          let theme = new Theme(ChartJS)
+          theme.init()
+
+          delete require.cache[require.resolve('chart.js')]
+          return ChartJS
         }
+      )
+
+      this.registerFonts()
     }
+  }
 
-    setCanvasService() {
-        if (!this.canvasService) {
-            //this.canvasService = new CanvasRenderService(this.width, this.height, undefined, undefined, ChartJsFactory)
-            this.canvasService = new CanvasRenderService(this.width, this.height, undefined, undefined, () => {
-                let ChartJS = require('chart.js')
+  get() {
+    return this.canvasService.renderToBuffer(this.config)
+  }
 
-                ChartJS.defaults.global.devicePixelRatio = 2
-                ChartJS.plugins.register(ticks)
+  setAxesTicks() {
+    if (
+      this.config.options &&
+      this.config.options.scales !== undefined &&
+      this.config.options.scales.yAxes !== undefined &&
+      this.config.options.scales.yAxes.length
+    ) {
+      this.config.options.scales.yAxes.map((item) => {
+        if (item.ticks !== undefined) {
+          if (item.id === 'left-y-axis') {
+            item.ticks.callback = (value) => {
+              return value
+                .toLocaleString(undefined, {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0
+                })
+                .replace(/,/g, '.')
+            }
+          }
 
-                if (this.global) {
-                    for (let i in this.global) {
-                        ChartJS.defaults.global[i] = this.global[i]
-                    }
-                }
-
-                let theme = new Theme(ChartJS)
-                theme.init()
-                
-                delete require.cache[require.resolve('chart.js')]
-                return ChartJS
-            })
-
-            this.canvasService.registerFont(__dirname + '/./fonts/Value-Regular.ttf', {family: 'Value'})
-            this.canvasService.registerFont(__dirname + '/./fonts/Frutiger-Regular.ttf', {family: 'Frutiger'})
-            this.canvasService.registerFont(__dirname + '/./fonts/Frutiger-Bold.ttf', {family: 'Frutiger Bold'})
-            this.canvasService.registerFont(__dirname + '/./fonts/SparBd.ttf', {family: 'Spar Bold'})
-            this.canvasService.registerFont(__dirname + '/./fonts/SparRg.ttf', {family: 'Spar'})
-            this.canvasService.registerFont(__dirname + '/./fonts/MinionPro-Regular.ttf', {family: 'MinionPro'})
-            this.canvasService.registerFont(__dirname + '/./fonts/MinionPro-Bold.ttf', {family: 'MinionPro Bold'})
-            this.canvasService.registerFont(__dirname + '/./fonts/Segoe-UI.ttf', {family: 'Segoe UI'})
-            this.canvasService.registerFont(__dirname + '/./fonts/Segoe-UI-Bold.ttf', {family: 'Segoe UI Bold'})
-            this.canvasService.registerFont(__dirname + '/./fonts/Segoe-UI-Bold-Italic.ttf', {family: 'Segoe UI Bold Italic'})
-            this.canvasService.registerFont(__dirname + '/./fonts/Segoe-UI-Italic.ttf', {family: 'Segoe UI Italic'})
+          if (item.id === 'right-y-axis') {
+            item.ticks.callback = (value) => {
+              if (value % 1 === 0) {
+                return value.toString() + ',-'
+              } else {
+                return value
+                  .toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  })
+                  .replace('.', ',')
+              }
+            }
+          }
         }
+      })
     }
-
-    async get() {
-        return this.canvasService.renderToBuffer(this.config)
-    }
-
-    setAxesTicks() {
-        if (this.config.options && 
-            this.config.options.scales !== undefined && 
-            this.config.options.scales.yAxes !== undefined && 
-            this.config.options.scales.yAxes.length
-        ) {
-            this.config.options.scales.yAxes.map((item, i) => {
-                if (item.ticks !== undefined) {
-                    if (item.id === 'left-y-axis') {
-                        item.ticks.callback = (value) => {
-                            return value.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })
-                                .replace(/,/g, '.')
-                        }
-                    }
-
-                    if (item.id === 'right-y-axis') {
-                        item.ticks.callback = (value, index, values) => {
-                            if (value % 1 === 0) {
-                                return value.toString() + ',-'
-                            } else {
-                                return value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                                    .replace('.', ',')
-                            }
-                        }
-                    }
-                }
-            })
-        }
-    }
+  }
 }
 
 module.exports = Charts

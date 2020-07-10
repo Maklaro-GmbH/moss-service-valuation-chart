@@ -1,5 +1,17 @@
-const charts = require('./src/controllers/ChartsController');
-const testData = require("./tests/data/test1.json");
+const charts = require('./src/controllers/ChartsController')
 
-const args = process.argv.slice(2);
-return charts.get(testData).then(chartImage => chartImage);
+const generateChart = (payload) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const dataParsed = JSON.parse(payload)
+      const chartBuffer = await charts.get(dataParsed)
+
+      if (Buffer.isBuffer(chartBuffer)) resolve(chartBuffer)
+      else resolve(`Error: ${chartBuffer}`)
+    } catch (e) {
+      reject(e)
+    }
+  })
+}
+
+module.exports = generateChart

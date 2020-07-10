@@ -3,3 +3,6 @@
 /public/build/
 npm-debug.log
 yarn-error.log
+
+### Jetbrains IDE local files ###
+.idea/*
