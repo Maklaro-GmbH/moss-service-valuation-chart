@@ -4,7 +4,9 @@
   "styling": {
     "fontPath": "/app/tests/fixtures/fonts/Frutiger-Regular.ttf",
     "fontSize": 12,
-    "fontColor": "#000"
+    "fontColor": "#666",
+    "lineColor": "#c40caa",
+    "gridColor": "#000"
   },
   "data": {
     "labels": [

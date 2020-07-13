@@ -11,17 +11,21 @@ const payloadSchema = require('./schemas/payload')
 
 class Chart {
   constructor(req) {
-    this.validateSchema(req)
+    if (this.validateSchema(req)) {
+      this.chartService = this.createChartService(req)
+      this.servicePayload = this.formChartServicePayload(req)
+    }
+  }
 
-    this.chartService = this.createChartService(req)
-    this.servicePayload = this.formChartServicePayload(req)
+  formValidationErrorMessage(errorsArray) {
+    return errorsArray.map(({ property, message }) => `'${property}' ${message}`).join(', ')
   }
 
   validateSchema(req) {
     const validationResult = validate(req, payloadSchema)
-    const hasErrors = !!validationResult.length
+    const hasErrors = !!validationResult.errors.length
     if (hasErrors) {
-      throw validationResult
+      throw this.formValidationErrorMessage(validationResult.errors)
     }
     return true
   }
@@ -62,12 +66,19 @@ class Chart {
       ...chartGeneratorConfig,
       data: {
         ...req.data,
-        datasets: this.transformDatasets(req.data.datasets)
+        datasets: this.transformDatasets(req.data.datasets, req.styling.lineColor)
       },
       options: {
         ...chartGeneratorConfig.options,
+        legend: {
+          ...chartGeneratorConfig.options.legend,
+          labels: {
+            ...chartGeneratorConfig.options.legend.labels,
+            fontColor: req.styling.fontColor
+          }
+        },
         scales: {
-          ...chartGeneratorConfig.options.scales,
+          xAxes: this.formXAxesFromDatasets(req.styling),
           yAxes: this.formYAxesFromDatasets(req.data.datasets)
         }
       }
@@ -88,10 +99,19 @@ class Chart {
     }))
   }
 
-  transformDatasets(datasets) {
+  formXAxesFromDatasets(styling) {
+    return chartGeneratorConfig.options.scales.xAxes.map((axis) => ({
+      ...axis,
+      gridLines: { ...axis.gridLines, color: styling.gridColor },
+      scaleLabel: { ...axis.scaleLabel, fontColor: styling.fontColor }
+    }))
+  }
+
+  transformDatasets(datasets, borderColor) {
     return datasets.map(({ yAxis, ...dataset }, index) => ({
       ...dataset,
       ...datasetBaseProps,
+      borderColor,
       yAxisID: `y-axis-${index}`
     }))
   }
@@ -100,11 +120,8 @@ class Chart {
     canvasService.registerFont(req.styling.fontPath, { family: 'font-family' })
   }
 
-  async get() {
-    const x = await this.chartService.renderToBuffer(this.servicePayload)
-    console.log(this.servicePayload)
-
-    return x
+  get() {
+    return this.chartService.renderToBuffer(this.servicePayload)
   }
 
   setAxesTicks(payload) {

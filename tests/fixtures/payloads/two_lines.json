@@ -4,7 +4,9 @@
   "styling": {
     "fontPath": "/app/tests/fixtures/fonts/Value-Regular.ttf",
     "fontSize": 12,
-    "fontColor": "#666"
+    "fontColor": "#000",
+    "lineColor": "rgb(50,206,101)",
+    "gridColor": "#000"
   },
   "data": {
     "labels": [

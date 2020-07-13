@@ -8,9 +8,11 @@ const payloadSchema = {
       properties: {
         fontPath: { type: 'string' },
         fontSize: { type: 'integer' },
-        fontColor: { type: 'string' }
+        fontColor: { type: 'string' },
+        lineColor: { type: 'string' },
+        gridColor: { type: 'string' }
       },
-      required: ['fontPath', 'fontSize', 'fontColor']
+      required: ['fontPath', 'fontSize', 'fontColor', 'lineColor', 'gridColor']
     },
     data: {
       type: 'object',

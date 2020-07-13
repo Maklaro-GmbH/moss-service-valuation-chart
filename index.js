@@ -4,14 +4,13 @@ const generateChart = (payload) => {
   return new Promise(async (resolve, reject) => {
     try {
       const dataParsed = JSON.parse(payload)
-      const chartBuffer = await new Chart(dataParsed).get()
-
+      const chart = new Chart(dataParsed)
+      const chartBuffer = await chart.get()
       if (Buffer.isBuffer(chartBuffer)) {
         resolve(chartBuffer)
-        return
+      } else {
+        reject(`Error: ${chartBuffer}`)
       }
-
-      reject(`Error: ${chartBuffer}`)
     } catch (e) {
       reject(e)
     }
