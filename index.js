@@ -1,21 +1,21 @@
-const charts = require('./src/controllers/ChartsController')
+const Chart = require('./src/Chart')
 
 const generateChart = (payload) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const dataParsed = JSON.parse(payload)
-            const chartBuffer = await charts.get(dataParsed)
+  return new Promise(async (resolve, reject) => {
+    try {
+      const dataParsed = JSON.parse(payload)
+      const chartBuffer = await new Chart(dataParsed).get()
 
-            if (Buffer.isBuffer(chartBuffer)) {
-                resolve(chartBuffer)
-                return;
-            }
+      if (Buffer.isBuffer(chartBuffer)) {
+        resolve(chartBuffer)
+        return
+      }
 
-            reject(`Error: ${chartBuffer}`)
-        } catch (e) {
-            reject(e)
-        }
-    })
+      reject(`Error: ${chartBuffer}`)
+    } catch (e) {
+      reject(e)
+    }
+  })
 }
 
 module.exports = generateChart
