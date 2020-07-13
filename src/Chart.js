@@ -13,7 +13,7 @@ class Chart {
   constructor(req) {
     if (this.validateSchema(req)) {
       this.chartService = this.createChartService(req)
-      this.servicePayload = this.formChartServicePayload(req)
+      this.chartServicePayload = this.formChartServicePayload(req)
     }
   }
 
@@ -121,7 +121,7 @@ class Chart {
   }
 
   get() {
-    return this.chartService.renderToBuffer(this.servicePayload)
+    return this.chartService.renderToBuffer(this.chartServicePayload)
   }
 
   setAxesTicks(payload) {
