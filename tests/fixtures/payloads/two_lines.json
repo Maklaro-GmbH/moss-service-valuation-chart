@@ -22,6 +22,7 @@
     "datasets": [
       {
         "label": "Kaufpreisentwicklung",
+        "type": "linear",
         "data": [
           {
             "date": "06.2018",
@@ -69,6 +70,7 @@
       },
       {
         "label": "Mietpreisentwicklung",
+        "type": "dotted",
         "data": [
           {
             "date": "06.2018",
@@ -99,17 +101,6 @@
             "y": 4.44
           }
         ],
-        "lineTension": 0.1,
-        "borderCapStyle": "round",
-        "borderDash": [
-          0,
-          10
-        ],
-        "borderDashOffset": [
-          0,
-          5
-        ],
-        "bezierCurve": false,
         "yAxis": {
           "position": "right",
           "label": "Mietpreis pro m\u00b2 in \u20ac",

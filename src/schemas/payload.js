@@ -29,6 +29,7 @@ const payloadSchema = {
             type: 'object',
             properties: {
               label: { type: 'string' },
+              type: { type: 'string', enum: ['linear', 'dotted'] },
               data: {
                 type: 'array',
                 items: {
@@ -43,7 +44,7 @@ const payloadSchema = {
               yAxis: {
                 type: 'object',
                 properties: {
-                  position: { type: 'string' },
+                  position: { type: 'string', enum: ['left', 'right'] },
                   label: { type: 'string' },
                   ticks: {
                     type: 'object',
@@ -58,7 +59,7 @@ const payloadSchema = {
                 required: ['position', 'label', 'ticks']
               }
             },
-            required: ['label', 'data', 'yAxis']
+            required: ['label', 'type', 'data', 'yAxis']
           }
         }
       },

@@ -5,6 +5,7 @@ const Theme = require('./Theme')
 const ticks = require('./plugins/ticks')
 const chartGeneratorConfig = require('./config/chartGeneratorConfig')
 const datasetBaseProps = require('./config/datasetBaseProps')
+const dottedDatasetProps = require('./config/dottedDatasetProps')
 const yAxeBaseProps = require('./config/yAxeBaseProps')
 const scaleLabelBaseProps = require('./config/scaleLabelBaseProps')
 const payloadSchema = require('./schemas/payload')
@@ -108,12 +109,17 @@ class Chart {
   }
 
   transformDatasets(datasets, borderColor) {
-    return datasets.map(({ yAxis, ...dataset }, index) => ({
-      ...dataset,
-      ...datasetBaseProps,
-      borderColor,
-      yAxisID: `y-axis-${index}`
-    }))
+    return datasets.map(({ yAxis, type, ...dataset }, index) => {
+      const typeRelatedAdditionalProps = type === 'dotted' ? dottedDatasetProps : {}
+
+      return {
+        ...dataset,
+        ...datasetBaseProps,
+        ...typeRelatedAdditionalProps,
+        borderColor,
+        yAxisID: `y-axis-${index}`
+      }
+    })
   }
 
   registerFont(canvasService, req) {
