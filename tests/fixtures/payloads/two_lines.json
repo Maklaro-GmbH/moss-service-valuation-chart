@@ -5,7 +5,7 @@
     "fontPath": "/app/tests/fixtures/fonts/Value-Regular.ttf",
     "fontSize": 12,
     "fontColor": "#000",
-    "lineColor": "rgb(50,206,101)",
+    "lineColor": "#0e74b6",
     "gridColor": "#000"
   },
   "data": {
@@ -22,7 +22,7 @@
     "datasets": [
       {
         "label": "Kaufpreisentwicklung",
-        "type": "linear",
+        "type": "purchase",
         "data": [
           {
             "date": "06.2018",
@@ -57,20 +57,11 @@
             "y": 728000
           }
         ],
-        "yAxis": {
-          "position": "left",
-          "label": "Kaufpreis in \u20ac",
-          "ticks": {
-            "beginAtZero": false,
-            "maxTicksLimit": 5,
-            "min": 600000,
-            "max": 800000
-          }
-        }
+        "yAxisLabel": "Kaufpreis in \u20ac"
       },
       {
         "label": "Mietpreisentwicklung",
-        "type": "dotted",
+        "type": "rental",
         "data": [
           {
             "date": "06.2018",
@@ -101,16 +92,7 @@
             "y": 4.44
           }
         ],
-        "yAxis": {
-          "position": "right",
-          "label": "Mietpreis pro m\u00b2 in \u20ac",
-          "ticks": {
-            "beginAtZero": false,
-            "maxTicksLimit": 5,
-            "min": 2,
-            "max": 10
-          }
-        }
+        "yAxisLabel": "Mietpreis pro m\u00b2 in \u20ac"
       }
     ]
   }

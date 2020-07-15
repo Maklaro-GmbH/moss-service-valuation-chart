@@ -1,7 +1,7 @@
 const { CanvasRenderService } = require('chartjs-node-canvas')
 const ChartJS = require('chart.js')
 const validate = require('jsonschema').validate
-const _ = require('lodash')
+const { merge } = require('lodash')
 
 const Theme = require('./Theme')
 const ticks = require('./plugins/ticks')
@@ -13,6 +13,7 @@ const payloadSchema = require('./schemas/payload')
 class Chart {
   constructor(req) {
     this.assertPayloadSchema(req)
+
     this.chartService = this.createChartService(req)
     this.chartServicePayload = this.formChartServicePayload(req)
   }
@@ -78,9 +79,8 @@ class Chart {
       }
     }
     this.setAxesTicks(objectComputedFromPayload)
-    const payload = _.merge(chartGeneratorConfig, objectComputedFromPayload)
 
-    return payload
+    return merge(chartGeneratorConfig, objectComputedFromPayload)
   }
 
   formYAxesFromDatasets(datasets) {
@@ -92,14 +92,15 @@ class Chart {
       color: 'rgba(150, 150, 150, 1)',
       type: 'linear',
       id: `y-axis-${index}`,
-      position: type === index % 2 ? 'right' : 'left',
+      position: index % 2 ? 'right' : 'left',
       scaleLabel: {
         labelString: yAxisLabel,
         display: true,
         align: 'end'
       },
       ticks: {
-        maxTicksLimit: 8,
+        beginAtZero: false,
+        maxTicksLimit: 5,
         ...this.computeTickRange(
           data,
           type === 'purchase' ? purchaseValuesRange : rentalValuesRange
@@ -110,12 +111,12 @@ class Chart {
 
   computeTickRange(data, range) {
     const values = data.map(({ y }) => y)
-    let max = Math.ceil(Math.max(values) / range) * range
-    let min = Math.ceil(Math.min(values) / -range) * -range
-    if (Math.min(values) >= max) {
+    let max = Math.ceil(Math.max(...values) / range) * range
+    let min = Math.ceil(Math.min(...values) / -range) * -range
+    if (Math.min(...values) >= max) {
       max += range
     }
-    if (Math.min(values) <= min) {
+    if (Math.min(...values) <= min) {
       min -= range
     }
     return { min, max }
