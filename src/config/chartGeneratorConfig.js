@@ -27,8 +27,6 @@ const chartGeneratorConfig = {
             drawOnChartArea: false,
             lineWidth: 1,
             tickMarkLength: 10,
-            zeroLineWidth: 1,
-            zeroLineColor: 'rgba(150, 150, 150, 1)'
           },
           ticks: {
             maxTicksLimit: 8,

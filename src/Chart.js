@@ -84,8 +84,10 @@ class Chart {
   }
 
   formYAxesFromDatasets(datasets) {
-    const purchaseValuesRange = 100000
-    const rentalValuesRange = 2
+    const valueRanges = {
+      purchase: 100000,
+      rental: 2
+    }
 
     return datasets.map(({ yAxisLabel, type, data }, index) => ({
       display: true,
@@ -101,15 +103,13 @@ class Chart {
       ticks: {
         beginAtZero: false,
         maxTicksLimit: 5,
-        ...this.computeTickRange(
-          data,
-          type === 'purchase' ? purchaseValuesRange : rentalValuesRange
-        )
+        ...this.computeTickRange(data, valueRanges[type])
       }
     }))
   }
 
   computeTickRange(data, range) {
+    if (!range) throw 'range must be defined'
     const values = data.map(({ y }) => y)
     let max = Math.ceil(Math.max(...values) / range) * range
     let min = Math.ceil(Math.min(...values) / -range) * -range
@@ -124,8 +124,12 @@ class Chart {
 
   transformDatasets(datasets, borderColor) {
     return datasets.map(({ yAxisLabel, type, ...dataset }, index) => {
-      const typeRelatedAdditionalProps =
-        type === 'purchase' ? purchaseDatasetProps : rentalDatasetProps
+      const defaultDatasetProps = {
+        purchase: purchaseDatasetProps,
+        rental: rentalDatasetProps
+      }
+      const typeRelatedAdditionalProps = defaultDatasetProps[type]
+      if (!typeRelatedAdditionalProps) throw 'Unknown dataset type'
 
       return {
         ...typeRelatedAdditionalProps,
