@@ -1,6 +1,6 @@
 const { CanvasRenderService } = require('chartjs-node-canvas')
 const ChartJS = require('chart.js')
-const validate = require('jsonschema').validate
+const { validate } = require('jsonschema')
 const { merge } = require('lodash')
 
 const Theme = require('./Theme')
@@ -56,7 +56,7 @@ class Chart {
   }
 
   formChartServicePayload(req) {
-    const objectComputedFromPayload = {
+    const objectComputedFromRequest = {
       data: {
         labels: req.data.labels,
         datasets: this.transformDatasets(req.data.datasets, req.styling.lineColor)
@@ -78,9 +78,9 @@ class Chart {
         }
       }
     }
-    this.setAxesTicks(objectComputedFromPayload)
+    this.setAxesTicks(objectComputedFromRequest)
 
-    return merge(chartGeneratorConfig, objectComputedFromPayload)
+    return merge(chartGeneratorConfig, objectComputedFromRequest)
   }
 
   formYAxesFromDatasets(datasets) {
