@@ -45,6 +45,7 @@
     "datasets": [
       {
         "label": "Kaufpreisentwicklung",
+        "yAxisLabel": "Kaufpreis in \u20ac",
         "type": "purchase",
         "data": [
           {
@@ -171,8 +172,7 @@
             "date": "03.2020",
             "y": 728000
           }
-        ],
-        "yAxisLabel": "Kaufpreis in \u20ac"
+        ]
       }
     ]
   }

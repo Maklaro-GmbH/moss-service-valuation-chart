@@ -22,6 +22,7 @@
     "datasets": [
       {
         "label": "Kaufpreisentwicklung",
+        "yAxisLabel": "Kaufpreis in \u20ac",
         "type": "purchase",
         "data": [
           {
@@ -56,11 +57,11 @@
             "date": "03.2020",
             "y": 728000
           }
-        ],
-        "yAxisLabel": "Kaufpreis in \u20ac"
+        ]
       },
       {
         "label": "Mietpreisentwicklung",
+        "yAxisLabel": "Mietpreis pro m\u00b2 in \u20ac",
         "type": "rental",
         "data": [
           {
@@ -91,8 +92,7 @@
             "date": "12.2019",
             "y": 4.44
           }
-        ],
-        "yAxisLabel": "Mietpreis pro m\u00b2 in \u20ac"
+        ]
       }
     ]
   }
