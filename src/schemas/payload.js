@@ -29,37 +29,21 @@ const payloadSchema = {
             type: 'object',
             properties: {
               label: { type: 'string' },
-              type: { type: 'string', enum: ['linear', 'dotted'] },
+              type: { type: 'string', enum: ['purchase', 'rental'] },
               data: {
                 type: 'array',
                 items: {
                   type: 'object',
                   properties: {
-                    '[a-z]+': { type: 'string' },
+                    date: { type: 'string' },
                     y: { type: 'number' }
                   },
-                  required: ['y']
+                  required: ['y', 'date']
                 }
               },
-              yAxis: {
-                type: 'object',
-                properties: {
-                  position: { type: 'string', enum: ['left', 'right'] },
-                  label: { type: 'string' },
-                  ticks: {
-                    type: 'object',
-                    properties: {
-                      maxTicksLimit: { type: 'integer' },
-                      min: { type: 'integer' },
-                      max: { type: 'integer' }
-                    },
-                    required: ['maxTicksLimit', 'min', 'max']
-                  }
-                },
-                required: ['position', 'label', 'ticks']
-              }
+              yAxisLabel: { type: 'string' }
             },
-            required: ['label', 'type', 'data', 'yAxis']
+            required: ['label', 'type', 'data', 'yAxisLabel']
           }
         }
       },

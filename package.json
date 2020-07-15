@@ -18,7 +18,8 @@
   "dependencies": {
     "chart.js": "^2.9.3",
     "chartjs-node-canvas": "^3.0.6",
-    "jsonschema": "^1.2.6"
+    "jsonschema": "^1.2.6",
+    "lodash": "^4.17.19"
   },
   "devDependencies": {
     "jest": "^26.1.0",

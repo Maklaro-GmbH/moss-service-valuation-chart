@@ -1,4 +1,4 @@
-const datasetBaseProps = {
+const purchaseDatasetProps = {
   fill: false,
   borderWidth: 4,
   pointStyle: 'line',
@@ -6,4 +6,4 @@ const datasetBaseProps = {
   xAxisID: 'x-axis'
 }
 
-module.exports = datasetBaseProps
+module.exports = purchaseDatasetProps

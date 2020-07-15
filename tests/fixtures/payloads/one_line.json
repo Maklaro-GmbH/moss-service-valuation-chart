@@ -9,6 +9,7 @@
     "gridColor": "#000"
   },
   "data": {
+    "type": "linear",
     "labels": [
       "09.2012",
       "12.2012",
@@ -45,6 +46,7 @@
     "datasets": [
       {
         "label": "Kaufpreisentwicklung",
+        "type": "purchase",
         "data": [
           {
             "date": "09.2012",
@@ -171,15 +173,7 @@
             "y": 728000
           }
         ],
-        "yAxis": {
-          "position": "left",
-          "label": "Kaufpreis in \u20ac",
-          "ticks": {
-            "maxTicksLimit": 6,
-            "min": 400000,
-            "max": 800000
-          }
-        }
+        "yAxisLabel": "Kaufpreis in \u20ac"
       }
     ]
   }

@@ -1,38 +1,30 @@
 const { CanvasRenderService } = require('chartjs-node-canvas')
+const ChartJS = require('chart.js')
 const validate = require('jsonschema').validate
+const _ = require('lodash')
 
 const Theme = require('./Theme')
 const ticks = require('./plugins/ticks')
 const chartGeneratorConfig = require('./config/chartGeneratorConfig')
-const datasetBaseProps = require('./config/datasetBaseProps')
-const dottedDatasetProps = require('./config/dottedDatasetProps')
-const yAxeBaseProps = require('./config/yAxeBaseProps')
-const scaleLabelBaseProps = require('./config/scaleLabelBaseProps')
+const purchaseDatasetProps = require('./config/purchaseDatasetProps')
+const rentalDatasetProps = require('./config/rentalDatasetProps')
 const payloadSchema = require('./schemas/payload')
 
 class Chart {
   constructor(req) {
-    if (this.validateSchema(req)) {
-      this.chartService = this.createChartService(req)
-      this.chartServicePayload = this.formChartServicePayload(req)
-    }
+    this.assertPayloadSchema(req)
+    this.chartService = this.createChartService(req)
+    this.chartServicePayload = this.formChartServicePayload(req)
   }
 
-  formValidationErrorMessage(errorsArray) {
-    return errorsArray.map(({ property, message }) => `'${property}' ${message}`).join(', ')
-  }
-
-  validateSchema(req) {
+  assertPayloadSchema(req) {
     const validationResult = validate(req, payloadSchema)
-    const hasErrors = !!validationResult.errors.length
-    if (hasErrors) {
-      throw this.formValidationErrorMessage(validationResult.errors)
+    if (!validationResult.valid) {
+      throw validationResult.toString()
     }
-    return true
   }
 
   createChartService(req) {
-    const ChartJS = require('chart.js')
     ChartJS.plugins.register(ticks)
     this.setServiceGlobalDefaults(ChartJS, req.styling)
     this.addChartTheming(ChartJS)
@@ -63,59 +55,81 @@ class Chart {
   }
 
   formChartServicePayload(req) {
-    const payload = {
-      ...chartGeneratorConfig,
+    const objectComputedFromPayload = {
       data: {
-        ...req.data,
+        labels: req.data.labels,
         datasets: this.transformDatasets(req.data.datasets, req.styling.lineColor)
       },
       options: {
-        ...chartGeneratorConfig.options,
         legend: {
-          ...chartGeneratorConfig.options.legend,
           labels: {
-            ...chartGeneratorConfig.options.legend.labels,
             fontColor: req.styling.fontColor
           }
         },
         scales: {
-          xAxes: this.formXAxesFromDatasets(req.styling),
+          xAxes: [
+            {
+              gridLines: { color: req.styling.gridColor },
+              scaleLabel: { fontColor: req.styling.fontColor }
+            }
+          ],
           yAxes: this.formYAxesFromDatasets(req.data.datasets)
         }
       }
     }
-    this.setAxesTicks(payload)
+    this.setAxesTicks(objectComputedFromPayload)
+    const payload = _.merge(chartGeneratorConfig, objectComputedFromPayload)
+
     return payload
   }
 
   formYAxesFromDatasets(datasets) {
-    return datasets.map(({ yAxis: { label, ...yAxis } }, index) => ({
-      ...yAxis,
-      ...yAxeBaseProps,
+    const purchaseValuesRange = 100000
+    const rentalValuesRange = 2
+
+    return datasets.map(({ yAxisLabel, type, data }, index) => ({
+      display: true,
+      color: 'rgba(150, 150, 150, 1)',
+      type: 'linear',
+      id: `y-axis-${index}`,
+      position: type === index % 2 ? 'right' : 'left',
       scaleLabel: {
-        labelString: label,
-        ...scaleLabelBaseProps
+        labelString: yAxisLabel,
+        display: true,
+        align: 'end'
       },
-      id: `y-axis-${index}`
+      ticks: {
+        maxTicksLimit: 8,
+        ...this.computeTickRange(
+          data,
+          type === 'purchase' ? purchaseValuesRange : rentalValuesRange
+        )
+      }
     }))
   }
 
-  formXAxesFromDatasets(styling) {
-    return chartGeneratorConfig.options.scales.xAxes.map((axis) => ({
-      ...axis,
-      gridLines: { ...axis.gridLines, color: styling.gridColor },
-      scaleLabel: { ...axis.scaleLabel, fontColor: styling.fontColor }
-    }))
+  computeTickRange(data, range) {
+    const values = data.map(({ y }) => y)
+    let max = Math.ceil(Math.max(values) / range) * range
+    let min = Math.ceil(Math.min(values) / -range) * -range
+    if (Math.min(values) >= max) {
+      max += range
+    }
+    if (Math.min(values) <= min) {
+      min -= range
+    }
+    return { min, max }
   }
 
   transformDatasets(datasets, borderColor) {
-    return datasets.map(({ yAxis, type, ...dataset }, index) => {
-      const typeRelatedAdditionalProps = type === 'dotted' ? dottedDatasetProps : {}
+    return datasets.map(({ yAxisLabel, type, ...dataset }, index) => {
+      const typeRelatedAdditionalProps =
+        type === 'purchase' ? purchaseDatasetProps : rentalDatasetProps
 
       return {
-        ...dataset,
-        ...datasetBaseProps,
         ...typeRelatedAdditionalProps,
+        label: dataset.label,
+        data: dataset.data,
         borderColor,
         yAxisID: `y-axis-${index}`
       }
