@@ -21,6 +21,12 @@ docker-compose run --rm --user 1000:1000 node bin/chart-valuation-service [json]
 docker-compose run --rm --user 1000:1000 node bin/chart-valuation-service < tests/fixtures/payloads/one_line.json > chart.png
 ```
 
+## Run tests
+
+```bash
+docker-compose run --rm --user 1000:1000 node yarn test
+```
+
 In order to generate the chart, pass JSON matching the schema from /src/schemas/payload.js
 
 You can find the example payloads in /src/tests/fixtures/payload
