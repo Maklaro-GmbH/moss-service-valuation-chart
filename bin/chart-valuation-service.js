@@ -27,12 +27,12 @@ outputPromise
     .then(
         (buffer) => {
             process.stdout.write(buffer);
-            process.exit(0);
+            process.exitCode = 0
         }
     )
     .catch(
         (error) => {
             process.stderr.write(error);
-            process.exit(1);
+            process.exitCode = 1
         }
     );
