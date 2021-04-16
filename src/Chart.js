@@ -1,4 +1,4 @@
-const { CanvasRenderService } = require('chartjs-node-canvas')
+const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const ChartJS = require('chart.js')
 const { validate } = require('jsonschema')
 const { merge } = require('lodash')
@@ -29,12 +29,12 @@ class Chart {
     ChartJS.plugins.register(ticks)
     this.setServiceGlobalDefaults(ChartJS, req.styling)
     this.addChartTheming(ChartJS)
-    const chartService = new CanvasRenderService(
-      req.width,
-      req.height,
-      undefined,
-      undefined,
-      () => ChartJS
+    const chartService = new ChartJSNodeCanvas(
+        {
+          width: req.width,
+          height: req.height,
+          chartCallback: () => ChartJS
+        }
     )
     this.registerFont(chartService, req)
     return chartService

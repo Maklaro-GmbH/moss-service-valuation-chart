@@ -1,6 +1,6 @@
 {
   "name": "moss-service-valuation-chart",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "",
   "scripts": {
     "test": "jest"
@@ -18,16 +18,16 @@
   },
   "homepage": "https://github.com/Maklaro-GmbH/moss-service-valuation-chart#readme",
   "dependencies": {
-    "chart.js": "^2.9.3",
-    "chartjs-node-canvas": "^3.0.6",
-    "jsonschema": "^1.2.6",
-    "lodash": "^4.17.20"
+    "chart.js": "^2.9.4",
+    "chartjs-node-canvas": "^3.1.0",
+    "jsonschema": "^1.4.0",
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
-    "jest": "^26.4.2",
-    "prettier": "^2.1.1"
+    "jest": "^26.6.3",
+    "prettier": "^2.2.1"
   },
   "engines": {
-    "node": "^14.9.0"
+    "node": "^14.16.1"
   }
 }
