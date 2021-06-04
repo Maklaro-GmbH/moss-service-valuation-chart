@@ -9,9 +9,6 @@ describe('chart regression', () => {
     const chart = new Chart(require(`./fixtures/payloads/${filename}`))
     const chartBuffer = await chart.get()
 
-    expect(chartBuffer).toMatchImageSnapshot({
-      failureThreshold: 0.01,
-      failureThresholdType: 'percent'
-    })
+    expect(chartBuffer).toMatchImageSnapshot()
   })
 })
