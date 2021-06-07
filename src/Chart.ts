@@ -1,7 +1,7 @@
 import { ChartJSNodeCanvas } from 'chartjs-node-canvas'
-import ChartJS, { ChartConfiguration, ChartDataSets } from 'chart.js'
+import ChartJS, { ChartConfiguration, ChartDataSets, ChartYAxe } from 'chart.js'
 import { validate } from 'jsonschema'
-import { merge } from 'lodash'
+import { parse as pathParse } from 'path'
 
 import Theme from './Theme'
 import ticks from './plugins/ticks'
@@ -16,6 +16,8 @@ import {
   DataSetData,
   DatasetType
 } from './schemas/payload'
+
+ChartJS.plugins.register(ticks)
 
 export = class Chart {
   readonly chartService: ChartJSNodeCanvas
@@ -37,7 +39,6 @@ export = class Chart {
   }
 
   createChartService(req: Payload): ChartJSNodeCanvas {
-    ChartJS.plugins.register(ticks)
     this.setServiceGlobalDefaults(ChartJS, req.styling)
     this.addChartTheming(ChartJS)
     const chartService = new ChartJSNodeCanvas({
@@ -53,7 +54,7 @@ export = class Chart {
   setServiceGlobalDefaults(chartJsInstance: typeof ChartJS, styling: Styling) {
     chartJsInstance.defaults.global = {
       ...chartJsInstance.defaults.global,
-      defaultFontFamily: 'font-family',
+      defaultFontFamily: this.getFontFamilyFromPath(styling.fontPath),
       defaultFontSize: styling.fontSize,
       defaultFontColor: styling.textColor,
       devicePixelRatio: 2
@@ -66,32 +67,42 @@ export = class Chart {
   }
 
   formChartServicePayload(req: Payload): ChartConfiguration {
-    const objectComputedFromRequest = {
+    const objectComputedFromRequest: ChartConfiguration = {
+      ...chartGeneratorConfig,
       data: {
         labels: req.data.labels as Array<string>,
         datasets: this.transformDatasets(req.data.datasets, req.styling.lineColor)
       },
       options: {
+        ...chartGeneratorConfig.options,
         legend: {
+          ...chartGeneratorConfig.options.legend,
           labels: {
+            ...chartGeneratorConfig.options.legend.labels,
             fontColor: req.styling.textColor
           }
         },
         scales: {
+          ...chartGeneratorConfig.options.scales,
           xAxes: [
             {
-              gridLines: { color: req.styling.gridColor },
-              scaleLabel: { fontColor: req.styling.textColor }
+              ...chartGeneratorConfig.options.scales.xAxes[0],
+              gridLines: {
+                ...chartGeneratorConfig.options.scales.xAxes[0].gridLines,
+                color: req.styling.gridColor
+              },
+              scaleLabel: {
+                ...chartGeneratorConfig.options.scales.xAxes[0].scaleLabel,
+                fontColor: req.styling.textColor
+              }
             }
           ],
-          yAxes: this.formYAxesFromDatasets(req.data.datasets)
+          yAxes: this.setAxesTicks(this.formYAxesFromDatasets(req.data.datasets))
         }
       }
     }
 
-    this.setAxesTicks(objectComputedFromRequest)
-
-    return merge(chartGeneratorConfig, objectComputedFromRequest)
+    return objectComputedFromRequest
   }
 
   formYAxesFromDatasets(datasets: ReadonlyArray<DataSet>) {
@@ -155,41 +166,51 @@ export = class Chart {
     })
   }
 
-  registerFont(canvasService: ChartJSNodeCanvas, req: Payload) {
-    canvasService.registerFont(req.styling.fontPath, { family: 'font-family' })
+  registerFont(canvasService: ChartJSNodeCanvas, { styling: { fontPath } }: Payload) {
+    canvasService.registerFont(fontPath, { family: this.getFontFamilyFromPath(fontPath) })
   }
 
   get(): Promise<Buffer> {
     return this.chartService.renderToBuffer(this.chartServicePayload)
   }
 
-  setAxesTicks(payload: ChartConfiguration): void {
-    payload.options?.scales?.yAxes?.forEach((item) => {
-      ;(item.ticks ??= {}).callback = (value) => {
-        if (item.position === 'left') {
-          return value
-            .toLocaleString(undefined, {
-              minimumFractionDigits: 0,
-              maximumFractionDigits: 0
-            })
-            .replace(/,/g, '.')
-        } else {
+  private setAxesTicks(yAxes: ReadonlyArray<ChartYAxe>): Array<ChartYAxe> {
+    return yAxes.map((yAxe) => ({
+      ...yAxe,
+      ticks: {
+        ...yAxe.ticks,
+        callback: (value) => {
+          if (yAxe.position === 'left') {
+            return value
+              .toLocaleString(undefined, {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+              })
+              .replace(/,/g, '.')
+          }
+
           if (typeof value === 'number') {
             if (value % 1 === 0) {
               return value.toString() + ',-'
-            } else {
-              return value
-                .toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2
-                })
-                .replace('.', ',')
             }
+
+            return value
+              .toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+              })
+              .replace('.', ',')
           }
 
           return value
         }
       }
-    })
+    }))
+  }
+
+  private getFontFamilyFromPath(path: string): string {
+    const parsedPath = pathParse(path)
+
+    return parsedPath.name || 'font-family'
   }
 }

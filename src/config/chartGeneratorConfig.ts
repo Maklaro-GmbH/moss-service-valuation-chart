@@ -45,4 +45,4 @@ export = {
       }
     }
   }
-} as ChartConfiguration
+} as const
