@@ -2,6 +2,9 @@
 
 const Chart = require('chart.js')
 
+/**
+ * @type Chart.Plugin
+ */
 const ticks = {
     id: "ticks-plugin",
     beforeDraw: function(chart) {

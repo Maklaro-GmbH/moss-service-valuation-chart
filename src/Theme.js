@@ -1,8 +1,11 @@
 // @ts-nocheck
 
 class Theme {
-  constructor(ChartJS) {
-    this.chart = ChartJS;
+  /**
+   * @param {InstanceType<import('chart.js')['Chart']>} chart
+   */
+  constructor(chart) {
+    this.chart = chart;
   }
 
   init() {
