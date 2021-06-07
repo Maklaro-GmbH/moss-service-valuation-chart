@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 const Chart = require('chart.js')
 
 const ticks = {
@@ -31,7 +33,7 @@ const ticks = {
             }), {
                 color: helpers$1.options.resolve([nestedOpts.fontColor, options.fontColor, defaults.defaultFontColor])
             })
-        }        
+        }
 
         function parseTickFontOptions(options) {
             let minor = parseFontOptions(options, options.minor)
@@ -57,7 +59,7 @@ const ticks = {
 
             let fonts = parseTickFontOptions(xAxis.options.ticks);
             let font = tick.major ? fonts.major : fonts.minor;
-            
+
             // draw tick
             ctx.save()
             ctx.textBaseline = 'middle'

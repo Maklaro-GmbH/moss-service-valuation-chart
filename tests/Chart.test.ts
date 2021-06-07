@@ -1,6 +1,6 @@
-const Chart = require('../src/Chart')
-const oneLinePayload = require('./fixtures/payloads/one_line.json')
-const twoLinesPayload = require('./fixtures/payloads/two_lines.json')
+import Chart from '../src/Chart'
+import oneLinePayload from './fixtures/payloads/one_line.json'
+import twoLinesPayload from './fixtures/payloads/two_lines.json'
 
 describe('Chart.js', function () {
   const chart = new Chart(oneLinePayload)

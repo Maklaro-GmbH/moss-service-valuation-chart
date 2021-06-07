@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const ChartJS = require('chart.js')
 const { validate } = require('jsonschema')

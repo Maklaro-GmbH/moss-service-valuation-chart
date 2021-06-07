@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 class Theme {
   constructor(ChartJS) {
     this.chart = ChartJS;
