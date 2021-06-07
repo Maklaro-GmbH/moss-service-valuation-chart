@@ -1,4 +1,5 @@
 import Chart from '../src/Chart'
+import type { Payload } from '../src/schemas/payload'
 import oneLinePayload from './fixtures/payloads/one_line.json'
 import twoLinesPayload from './fixtures/payloads/two_lines.json'
 
@@ -9,7 +10,7 @@ describe('Chart.js', function () {
     it('should form expected object for one line chart', function () {
       const expected = require('./expected/one_line_chart')
 
-      const result = chart.formChartServicePayload(oneLinePayload)
+      const result = chart.formChartServicePayload(oneLinePayload as Payload)
       expect(result).toEqual(expected)
     })
 
@@ -25,6 +26,7 @@ describe('Chart.js', function () {
     const { data } = twoLinesPayload.data.datasets[0]
 
     it('should throw an error when range is not defined', function () {
+      // @ts-expect-error
       const result = () => chart.computeTickRange(data)
       expect(result).toThrow('range must be defined')
     })

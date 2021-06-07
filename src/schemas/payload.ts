@@ -1,4 +1,41 @@
-const payloadSchema = {
+export interface Payload {
+  readonly data: PayloadData
+  readonly height: number
+  readonly styling: Styling
+  readonly width: number
+}
+
+export interface PayloadData {
+  readonly datasets: ReadonlyArray<DataSet>
+  readonly labels: ReadonlyArray<string>
+}
+
+export interface DataSet {
+  readonly data: ReadonlyArray<DataSetData>
+  readonly label: string
+  readonly type: DatasetType
+  readonly yAxisLabel: string
+}
+
+export interface DataSetData {
+  readonly date: string
+  readonly y: number
+}
+
+export enum DatasetType {
+  Purchase = 'purchase',
+  Rental = 'rental'
+}
+
+export interface Styling {
+  readonly fontPath: string
+  readonly fontSize: number
+  readonly gridColor: string
+  readonly lineColor: string
+  readonly textColor: string
+}
+
+export const payloadSchema = {
   type: 'object',
   properties: {
     width: { type: 'integer' },
@@ -51,6 +88,6 @@ const payloadSchema = {
     }
   },
   required: ['width', 'height', 'styling', 'data']
-}
+} as const
 
-module.exports = payloadSchema
+export default payloadSchema

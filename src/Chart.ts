@@ -1,48 +1,56 @@
-// @ts-nocheck
+import { ChartJSNodeCanvas } from 'chartjs-node-canvas'
+import ChartJS, { ChartConfiguration, ChartDataSets } from 'chart.js'
+import { validate } from 'jsonschema'
+import { merge } from 'lodash'
 
-const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
-const ChartJS = require('chart.js')
-const { validate } = require('jsonschema')
-const { merge } = require('lodash')
+import Theme from './Theme'
+import ticks from './plugins/ticks'
+import chartGeneratorConfig from './config/chartGeneratorConfig'
+import purchaseDatasetProps from './config/purchaseDatasetProps'
+import rentalDatasetProps from './config/rentalDatasetProps'
+import {
+  payloadSchema,
+  Payload,
+  Styling,
+  DataSet,
+  DataSetData,
+  DatasetType
+} from './schemas/payload'
 
-const Theme = require('./Theme')
-const ticks = require('./plugins/ticks')
-const chartGeneratorConfig = require('./config/chartGeneratorConfig')
-const purchaseDatasetProps = require('./config/purchaseDatasetProps')
-const rentalDatasetProps = require('./config/rentalDatasetProps')
-const payloadSchema = require('./schemas/payload')
+export = class Chart {
+  readonly chartService: ChartJSNodeCanvas
 
-class Chart {
-  constructor(req) {
+  readonly chartServicePayload: ChartConfiguration
+
+  constructor(req: unknown) {
     this.assertPayloadSchema(req)
 
     this.chartService = this.createChartService(req)
     this.chartServicePayload = this.formChartServicePayload(req)
   }
 
-  assertPayloadSchema(req) {
+  assertPayloadSchema(req: unknown): asserts req is Payload {
     const validationResult = validate(req, payloadSchema)
     if (!validationResult.valid) {
       throw validationResult.toString()
     }
   }
 
-  createChartService(req) {
+  createChartService(req: Payload): ChartJSNodeCanvas {
     ChartJS.plugins.register(ticks)
     this.setServiceGlobalDefaults(ChartJS, req.styling)
     this.addChartTheming(ChartJS)
-    const chartService = new ChartJSNodeCanvas(
-        {
-          width: req.width,
-          height: req.height,
-          chartCallback: () => ChartJS
-        }
-    )
+    const chartService = new ChartJSNodeCanvas({
+      width: req.width,
+      height: req.height,
+      // @ts-ignore
+      chartCallback: () => ChartJS
+    })
     this.registerFont(chartService, req)
     return chartService
   }
 
-  setServiceGlobalDefaults(chartJsInstance, styling) {
+  setServiceGlobalDefaults(chartJsInstance: typeof ChartJS, styling: Styling) {
     chartJsInstance.defaults.global = {
       ...chartJsInstance.defaults.global,
       defaultFontFamily: 'font-family',
@@ -52,15 +60,15 @@ class Chart {
     }
   }
 
-  addChartTheming(chartJsInstance) {
+  addChartTheming(chartJsInstance: typeof ChartJS) {
     const theme = new Theme(chartJsInstance)
     theme.init()
   }
 
-  formChartServicePayload(req) {
+  formChartServicePayload(req: Payload): ChartConfiguration {
     const objectComputedFromRequest = {
       data: {
-        labels: req.data.labels,
+        labels: req.data.labels as Array<string>,
         datasets: this.transformDatasets(req.data.datasets, req.styling.lineColor)
       },
       options: {
@@ -80,12 +88,13 @@ class Chart {
         }
       }
     }
+
     this.setAxesTicks(objectComputedFromRequest)
 
     return merge(chartGeneratorConfig, objectComputedFromRequest)
   }
 
-  formYAxesFromDatasets(datasets) {
+  formYAxesFromDatasets(datasets: ReadonlyArray<DataSet>) {
     const valueRanges = {
       purchase: 100000,
       rental: 2
@@ -110,7 +119,7 @@ class Chart {
     }))
   }
 
-  computeTickRange(data, range) {
+  computeTickRange(data: ReadonlyArray<DataSetData>, range: number) {
     if (!range) throw 'range must be defined'
     const values = data.map(({ y }) => y)
     let max = Math.ceil(Math.max(...values) / range) * range
@@ -124,36 +133,39 @@ class Chart {
     return { min, max }
   }
 
-  transformDatasets(datasets, borderColor) {
-    return datasets.map(({ yAxisLabel, type, ...dataset }, index) => {
+  transformDatasets(
+    datasets: ReadonlyArray<DataSet>,
+    borderColor: Styling['lineColor']
+  ): ChartDataSets[] {
+    return datasets.map(({ yAxisLabel, type, ...dataset }, index): ChartDataSets => {
       const defaultDatasetProps = {
-        purchase: purchaseDatasetProps,
-        rental: rentalDatasetProps
-      }
+        [DatasetType.Purchase]: purchaseDatasetProps,
+        [DatasetType.Rental]: rentalDatasetProps
+      } as const
       const typeRelatedAdditionalProps = defaultDatasetProps[type]
       if (!typeRelatedAdditionalProps) throw 'Unknown dataset type'
 
       return {
         ...typeRelatedAdditionalProps,
         label: dataset.label,
-        data: dataset.data,
+        data: Array.from(dataset.data),
         borderColor,
         yAxisID: `y-axis-${index}`
       }
     })
   }
 
-  registerFont(canvasService, req) {
+  registerFont(canvasService: ChartJSNodeCanvas, req: Payload) {
     canvasService.registerFont(req.styling.fontPath, { family: 'font-family' })
   }
 
-  get() {
+  get(): Promise<Buffer> {
     return this.chartService.renderToBuffer(this.chartServicePayload)
   }
 
-  setAxesTicks(payload) {
-    payload.options.scales.yAxes.forEach((item) => {
-      item.ticks.callback = (value) => {
+  setAxesTicks(payload: ChartConfiguration): void {
+    payload.options?.scales?.yAxes?.forEach((item) => {
+      ;(item.ticks ??= {}).callback = (value) => {
         if (item.position === 'left') {
           return value
             .toLocaleString(undefined, {
@@ -162,20 +174,22 @@ class Chart {
             })
             .replace(/,/g, '.')
         } else {
-          if (value % 1 === 0) {
-            return value.toString() + ',-'
-          } else {
-            return value
-              .toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-              })
-              .replace('.', ',')
+          if (typeof value === 'number') {
+            if (value % 1 === 0) {
+              return value.toString() + ',-'
+            } else {
+              return value
+                .toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                })
+                .replace('.', ',')
+            }
           }
+
+          return value
         }
       }
     })
   }
 }
-
-module.exports = Chart
