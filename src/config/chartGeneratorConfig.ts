@@ -1,4 +1,6 @@
-const chartGeneratorConfig = {
+import type { ChartConfiguration } from 'chart.js'
+
+export = {
   type: 'line',
   options: {
     legend: {
@@ -26,7 +28,7 @@ const chartGeneratorConfig = {
             drawBorder: false,
             drawOnChartArea: false,
             lineWidth: 1,
-            tickMarkLength: 10,
+            tickMarkLength: 10
           },
           ticks: {
             maxTicksLimit: 8,
@@ -43,6 +45,4 @@ const chartGeneratorConfig = {
       }
     }
   }
-}
-
-module.exports = chartGeneratorConfig
+} as const

@@ -1,38 +1,16 @@
 #!/usr/bin/env node
 
-const fs = require('fs');
-const Chart = require('../src/Chart')
+require('ts-node').register({
+  transpileOnly: true
+})
 
-const generateChart = (payload) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const dataParsed = JSON.parse(payload)
-      const chart = new Chart(dataParsed)
-      const chartBuffer = await chart.get()
-      if (Buffer.isBuffer(chartBuffer)) {
-        resolve(chartBuffer)
-      } else {
-        reject(`Error: ${chartBuffer}`)
-      }
-    } catch (e) {
-      reject(e)
-    }
+require('../src/generateChart')
+  .generateChart(process.stdin)
+  .then((buffer) => {
+    process.stdout.write(buffer)
+    process.exitCode = 0
   })
-}
-
-const jsonAsString = fs.readFileSync("/dev/stdin", "utf-8");
-
-const outputPromise = generateChart(jsonAsString);
-outputPromise
-    .then(
-        (buffer) => {
-            process.stdout.write(buffer);
-            process.exitCode = 0
-        }
-    )
-    .catch(
-        (error) => {
-            process.stderr.write(error);
-            process.exitCode = 1
-        }
-    );
+  .catch((error) => {
+    process.stderr.write(error)
+    process.exitCode = 1
+  })
