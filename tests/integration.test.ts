@@ -1,8 +1,8 @@
 import Chart from '../src/Chart'
 
-describe('chart regression', () => {
+describe('chart generation integration', () => {
   it.each([['one_line.json'], ['two_lines.json']])(
-    'should match the snapshoot for %p',
+    'should match the snapshot for %p',
     async (filename) => {
       const chart = new Chart(await import(`./fixtures/payloads/${filename}`))
       const chartBuffer = await chart.get()

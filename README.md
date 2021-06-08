@@ -6,7 +6,7 @@ Contains chart-node-canvas ChartJS implementation.
 
 ```bash
 docker-compose build
-docker-compose run --rm --user 1000:1000 node npm ci
+docker-compose run --rm --user 1000:1000 node yarn install --frozen-lockfile
 ```
 
 ## Run bin exec file
@@ -25,7 +25,7 @@ docker-compose run --rm --user 1000:1000 node bin/chart-valuation-service < test
 ## Run tests
 
 ```bash
-docker-compose run --rm --user 1000:1000 node npm test
+docker-compose run --rm --user 1000:1000 node yarn test
 ```
 
 In order to generate the chart, pass JSON matching the schema from /src/schemas/payload.js
