@@ -5,6 +5,7 @@
     "transpileOnly": true
   },
   "compilerOptions": {
+    "lib": ["DOM"],
     "noEmit": true,
     "checkJs": true,
     "resolveJsonModule": true
