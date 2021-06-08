@@ -1,4 +1,4 @@
-const payload = {
+export default {
   data: {
     datasets: [
       {
@@ -240,6 +240,4 @@ const payload = {
     }
   },
   type: 'line'
-}
-
-module.exports = payload
+} as const
