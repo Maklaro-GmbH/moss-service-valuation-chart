@@ -1,9 +1,9 @@
-import type { ChartDataSets } from 'chart.js'
+import type { ChartDataset } from 'chart.js'
 
-export = {
+export default {
   fill: false,
   borderWidth: 4,
   pointStyle: 'line',
   pointRadius: 0,
   xAxisID: 'x-axis'
-} as ChartDataSets
+} as ChartDataset

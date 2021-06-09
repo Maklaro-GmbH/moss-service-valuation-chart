@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import type { default as ChartJS, ChartLegendItem, ChartDataSets, PointStyle } from 'chart.js'
 
 export default class Theme {

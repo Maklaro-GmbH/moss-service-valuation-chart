@@ -1,19 +1,17 @@
-import { helpers, MajorTickOptions, plugins, TickOptions } from 'chart.js'
+// @ts-nocheck
 
-type Plugin = Parameters<typeof plugins['register']>[0]
+import { helpers, MajorTickOptions, plugins, TickOptions, Plugin } from 'chart.js'
 
 const { options: helpersOptions } = helpers
 
-const parseFont: (
-  val: unknown
-) => {
+const parseFont: (val: unknown) => {
   readonly family: string
   readonly lineHeight: number
   readonly size: number
   readonly style: number
   readonly weight: null
   readonly string: string
-} = helpersOptions._parseFont
+} = helpersOptions?._parseFont
 
 function parseFontOptions(options: TickOptions, nestedOpts?: MajorTickOptions) {
   return {

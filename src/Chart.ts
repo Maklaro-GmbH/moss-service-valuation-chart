@@ -1,8 +1,7 @@
 import { ChartJSNodeCanvas } from 'chartjs-node-canvas'
-import ChartJS, { ChartConfiguration, ChartDataSets, ChartYAxe } from 'chart.js'
+import ChartJS, { ChartConfiguration, Chart, ChartDataset, ScaleChartOptions } from 'chart.js'
 import { validate } from 'jsonschema'
 import { parse as pathParse } from 'path'
-
 import Theme from './Theme'
 import ticks from './plugins/ticks'
 import chartGeneratorConfig from './config/chartGeneratorConfig'
@@ -17,9 +16,12 @@ import {
   DatasetType
 } from './schemas/payload'
 
-ChartJS.plugins.register(ticks)
+const enabled = false
+if (enabled) {
+  Chart.register(ticks)
+}
 
-export = class Chart {
+export default class MossChart {
   readonly chartService: ChartJSNodeCanvas
 
   readonly chartServicePayload: ChartConfiguration
@@ -39,65 +41,66 @@ export = class Chart {
   }
 
   createChartService(req: Payload): ChartJSNodeCanvas {
-    this.setServiceGlobalDefaults(ChartJS, req.styling)
+    this.setServiceDefaults(ChartJS, req.styling)
     this.addChartTheming(ChartJS)
     const chartService = new ChartJSNodeCanvas({
       width: req.width,
-      height: req.height,
-      // @ts-ignore
-      chartCallback: () => ChartJS
+      height: req.height
     })
     this.registerFont(chartService, req)
     return chartService
   }
 
-  setServiceGlobalDefaults(chartJsInstance: typeof ChartJS, styling: Styling) {
-    chartJsInstance.defaults.global = {
-      ...chartJsInstance.defaults.global,
-      defaultFontFamily: this.getFontFamilyFromPath(styling.fontPath),
-      defaultFontSize: styling.fontSize,
-      defaultFontColor: styling.textColor,
-      devicePixelRatio: 2
-    }
+  private setServiceDefaults(chart: typeof ChartJS, styling: Styling) {
+    chart.defaults.font.family = this.getFontFamilyFromPath(styling.fontPath)
+    chart.defaults.font.size = styling.fontSize
+    chart.defaults.color = styling.textColor
+    chart.defaults.devicePixelRatio = 2
   }
 
-  addChartTheming(chartJsInstance: typeof ChartJS) {
-    const theme = new Theme(chartJsInstance)
-    theme.init()
+  private addChartTheming(chartJsInstance: typeof ChartJS) {
+    const enabled = false
+    if (enabled) {
+      const theme = new Theme(chartJsInstance)
+      theme.init()
+    }
   }
 
   formChartServicePayload(req: Payload): ChartConfiguration {
     const objectComputedFromRequest: ChartConfiguration = {
       ...chartGeneratorConfig,
       data: {
-        labels: req.data.labels as Array<string>,
+        labels: Array.from(req.data.labels),
         datasets: this.transformDatasets(req.data.datasets, req.styling.lineColor)
       },
       options: {
         ...chartGeneratorConfig.options,
-        legend: {
-          ...chartGeneratorConfig.options.legend,
-          labels: {
-            ...chartGeneratorConfig.options.legend.labels,
-            fontColor: req.styling.textColor
+        plugins: {
+          ...chartGeneratorConfig.options?.plugins,
+          legend: {
+            ...chartGeneratorConfig.options?.plugins?.legend,
+            labels: {
+              ...chartGeneratorConfig.options?.plugins?.legend?.labels,
+              color: req.styling.textColor
+            }
           }
         },
         scales: {
-          ...chartGeneratorConfig.options.scales,
-          xAxes: [
-            {
-              ...chartGeneratorConfig.options.scales.xAxes[0],
-              gridLines: {
-                ...chartGeneratorConfig.options.scales.xAxes[0].gridLines,
-                color: req.styling.gridColor
-              },
-              scaleLabel: {
-                ...chartGeneratorConfig.options.scales.xAxes[0].scaleLabel,
-                fontColor: req.styling.textColor
-              }
+          ...chartGeneratorConfig.options?.scales,
+          'x-axis': {
+            ...chartGeneratorConfig.options?.scales?.['x-axis'],
+            grid: {
+              ...chartGeneratorConfig.options?.scales?.['x-axis']?.grid,
+              color: req.styling.gridColor
+            },
+            // @ts-ignore generic union stuff...
+            title: {
+              // @ts-ignore scale is an union determined by type so `title` may not exists
+              ...chartGeneratorConfig.options?.scales?.['x-axis']?.title,
+              color: req.styling.textColor
             }
-          ],
-          yAxes: this.setAxesTicks(this.formYAxesFromDatasets(req.data.datasets))
+          },
+          ...this.setScalesTicks(this.formLinearScalesFromDataSets(req.data.datasets))
         }
       }
     }
@@ -105,32 +108,44 @@ export = class Chart {
     return objectComputedFromRequest
   }
 
-  formYAxesFromDatasets(datasets: ReadonlyArray<DataSet>) {
+  private formLinearScalesFromDataSets(
+    datasets: ReadonlyArray<DataSet>
+  ): Required<Required<ChartConfiguration>['options']>['scales'] {
     const valueRanges = {
       purchase: 100000,
       rental: 2
-    }
+    } as const
 
-    return datasets.map(({ yAxisLabel, type, data }, index) => ({
-      display: true,
-      color: 'rgba(150, 150, 150, 1)',
-      type: 'linear',
-      id: `y-axis-${index}`,
-      position: index % 2 ? 'right' : 'left',
-      scaleLabel: {
-        labelString: yAxisLabel,
-        display: true,
-        align: 'end'
-      },
-      ticks: {
-        beginAtZero: false,
-        maxTicksLimit: 5,
-        ...this.computeTickRange(data, valueRanges[type])
-      }
-    }))
+    /**
+     * @todo replace with `Object.fromEntries` when possible
+     */
+    return Object.assign(
+      {},
+      ...datasets.map(
+        (
+          { yAxisLabel, type, data },
+          index
+        ): Required<Required<ChartConfiguration>['options']>['scales'] => ({
+          [`y-axis-${index}`]: {
+            ...this.computeTickRange(data, valueRanges[type]),
+            type: 'linear',
+            display: true,
+            position: index % 2 ? 'right' : 'left',
+            beginAtZero: false,
+            ticks: {
+              maxTicksLimit: 5
+            },
+            title: {
+              display: true,
+              text: yAxisLabel
+            }
+          }
+        })
+      )
+    )
   }
 
-  computeTickRange(data: ReadonlyArray<DataSetData>, range: number) {
+  public computeTickRange(data: ReadonlyArray<DataSetData>, range: number) {
     if (!range) throw 'range must be defined'
     const values = data.map(({ y }) => y)
     let max = Math.ceil(Math.max(...values) / range) * range
@@ -141,29 +156,37 @@ export = class Chart {
     if (Math.min(...values) <= min) {
       min -= range
     }
-    return { min, max }
+    return { min, max } as const
   }
 
   transformDatasets(
     datasets: ReadonlyArray<DataSet>,
     borderColor: Styling['lineColor']
-  ): ChartDataSets[] {
-    return datasets.map(({ yAxisLabel, type, ...dataset }, index): ChartDataSets => {
+  ): ChartDataset[] {
+    return datasets.map(({ yAxisLabel, type, ...dataset }, index): ChartDataset => {
       const defaultDatasetProps = {
         [DatasetType.Purchase]: purchaseDatasetProps,
         [DatasetType.Rental]: rentalDatasetProps
       } as const
       const typeRelatedAdditionalProps = defaultDatasetProps[type]
-      if (!typeRelatedAdditionalProps) throw 'Unknown dataset type'
+      if (!typeRelatedAdditionalProps) throw `Unknown dataset type: ${JSON.stringify(type)}`
 
       return {
         ...typeRelatedAdditionalProps,
         label: dataset.label,
-        data: Array.from(dataset.data),
+        data: this.getChartDatasetDataFromChartDatasetData(dataset.data),
         borderColor,
-        yAxisID: `y-axis-${index}`
+        // @ts-ignore generic type union and stuff...
+        yAxisID: `y-axis-${index}`,
+        xAxisID: `x-axis`
       }
     })
+  }
+
+  private getChartDatasetDataFromChartDatasetData(
+    values: ReadonlyArray<DataSetData>
+  ): ChartDataset['data'] {
+    return values.map((data): ChartDataset['data'][number] => data.y)
   }
 
   registerFont(canvasService: ChartJSNodeCanvas, { styling: { fontPath } }: Payload) {
@@ -174,38 +197,47 @@ export = class Chart {
     return this.chartService.renderToBuffer(this.chartServicePayload)
   }
 
-  private setAxesTicks(yAxes: ReadonlyArray<ChartYAxe>): Array<ChartYAxe> {
-    return yAxes.map((yAxe) => ({
-      ...yAxe,
-      ticks: {
-        ...yAxe.ticks,
-        callback: (value) => {
-          if (yAxe.position === 'left') {
-            return value
-              .toLocaleString(undefined, {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-              })
-              .replace(/,/g, '.')
-          }
+  private setScalesTicks(
+    scales: Required<Required<ChartConfiguration>['options']>['scales']
+  ): Required<Required<ChartConfiguration>['options']>['scales'] {
+    return Object.assign(
+      {},
+      ...Object.entries(scales).map(
+        ([id, scale]): Required<Required<ChartConfiguration>['options']>['scales'] => ({
+          [id]: {
+            ...scale,
+            ticks: {
+              ...scale!.ticks,
+              callback: (value) => {
+                if ((scale as any)!.position === 'left') {
+                  return value
+                    .toLocaleString(undefined, {
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0
+                    })
+                    .replace(/,/g, '.')
+                }
 
-          if (typeof value === 'number') {
-            if (value % 1 === 0) {
-              return value.toString() + ',-'
+                if (typeof value === 'number') {
+                  if (value % 1 === 0) {
+                    return value.toString() + ',-'
+                  }
+
+                  return value
+                    .toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                    })
+                    .replace('.', ',')
+                }
+
+                return value
+              }
             }
-
-            return value
-              .toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-              })
-              .replace('.', ',')
           }
-
-          return value
-        }
-      }
-    }))
+        })
+      )
+    )
   }
 
   private getFontFamilyFromPath(path: string): string {
