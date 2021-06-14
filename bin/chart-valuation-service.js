@@ -12,14 +12,6 @@ require('../src/generateChart')
     process.exitCode = 0
   })
   .catch((error) => {
-    if (console) {
-      // pretty-print the error
-      console.error(error)
-    } else {
-      process.stderr.write(
-        typeof error === 'string' || error instanceof Uint8Array ? error : `${error}`
-      )
-    }
-
+    process.stderr.write(error)
     process.exitCode = 1
   })
