@@ -1,9 +1,9 @@
 import { ChartJSNodeCanvas } from 'chartjs-node-canvas'
-import ChartJS, { ChartConfiguration, Chart, ChartDataset, ScaleChartOptions } from 'chart.js'
+import ChartJS, { ChartConfiguration, Chart, ChartDataset } from 'chart.js'
 import { validate } from 'jsonschema'
 import { parse as pathParse } from 'path'
 import Theme from './Theme'
-import ticks from './plugins/ticks'
+import makeTicksPlugin from './plugins/ticks'
 import chartGeneratorConfig from './config/chartGeneratorConfig'
 import purchaseDatasetProps from './config/purchaseDatasetProps'
 import rentalDatasetProps from './config/rentalDatasetProps'
@@ -17,9 +17,7 @@ import {
 } from './schemas/payload'
 
 const enabled = false
-if (enabled) {
-  Chart.register(ticks)
-}
+Chart.register(makeTicksPlugin({ scaleName: 'x-axis' }))
 
 export default class MossChart {
   readonly chartService: ChartJSNodeCanvas
