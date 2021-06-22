@@ -1,5 +1,5 @@
 import { ChartJSNodeCanvas } from 'chartjs-node-canvas'
-import ChartJS, { ChartConfiguration, Chart, ChartDataset } from 'chart.js'
+import ChartJS, { ChartConfiguration, Chart, ChartDataset, LegendItem } from 'chart.js'
 import { validate } from 'jsonschema'
 import { parse as pathParse } from 'path'
 import Theme from './Theme'
@@ -16,7 +16,6 @@ import {
   DatasetType
 } from './schemas/payload'
 
-const enabled = false
 Chart.register(makeTicksPlugin({ scaleName: 'x-axis' }))
 
 export default class MossChart {
@@ -79,6 +78,21 @@ export default class MossChart {
             ...chartGeneratorConfig.options?.plugins?.legend,
             labels: {
               ...chartGeneratorConfig.options?.plugins?.legend?.labels,
+              // usePointStyle: true,
+              // boxWidth: 100,
+              generateLabels: (chart) => {
+                return chart.data.datasets.map(
+                  (dataset, index): LegendItem => ({
+                    text: dataset.label ?? '',
+                    datasetIndex: dataset.order ?? index,
+                    fontColor: dataset.borderColor as string,
+                    lineWidth: dataset.borderWidth as number,
+                    fillStyle: dataset.borderColor as string,
+                    pointStyle: 'line'
+                    // pointStyle: dataset.s
+                  })
+                )
+              },
               color: req.styling.textColor
             }
           }
