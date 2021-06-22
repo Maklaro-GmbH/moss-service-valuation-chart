@@ -12,6 +12,7 @@ require('../src/generateChart')
     process.exitCode = 0
   })
   .catch((error) => {
-    process.stderr.write(error)
+    // the error can be anything, let the `console` handle printing it
+    console.error(error)
     process.exitCode = 1
   })
