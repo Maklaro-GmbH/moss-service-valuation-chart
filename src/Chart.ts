@@ -1,5 +1,5 @@
 import { ChartJSNodeCanvas } from 'chartjs-node-canvas'
-import ChartJS, { ChartConfiguration, Chart, ChartDataset, LegendItem } from 'chart.js'
+import ChartJS, { ChartConfiguration, Chart, ChartDataset, LegendItem, PointStyle } from 'chart.js'
 import { validate } from 'jsonschema'
 import { parse as pathParse } from 'path'
 import Theme from './Theme'
@@ -19,9 +19,9 @@ import {
 Chart.register(makeTicksPlugin({ scaleName: 'x-axis' }))
 
 export default class MossChart {
-  readonly chartService: ChartJSNodeCanvas
+  private readonly chartService: ChartJSNodeCanvas
 
-  readonly chartServicePayload: ChartConfiguration
+  private readonly chartServicePayload: ChartConfiguration
 
   constructor(req: unknown) {
     this.assertPayloadSchema(req)
@@ -30,14 +30,14 @@ export default class MossChart {
     this.chartServicePayload = this.formChartServicePayload(req)
   }
 
-  assertPayloadSchema(req: unknown): asserts req is Payload {
+  private assertPayloadSchema(req: unknown): asserts req is Payload {
     const validationResult = validate(req, payloadSchema)
     if (!validationResult.valid) {
       throw validationResult.toString()
     }
   }
 
-  createChartService(req: Payload): ChartJSNodeCanvas {
+  private createChartService(req: Payload): ChartJSNodeCanvas {
     this.setServiceDefaults(ChartJS, req.styling)
     this.addChartTheming(ChartJS)
     const chartService = new ChartJSNodeCanvas({
@@ -63,12 +63,14 @@ export default class MossChart {
     }
   }
 
-  formChartServicePayload(req: Payload): ChartConfiguration {
+  public formChartServicePayload(req: Payload): ChartConfiguration {
+    const datasets = this.transformDatasets(req.data.datasets, req.styling.lineColor)
+
     const objectComputedFromRequest: ChartConfiguration = {
       ...chartGeneratorConfig,
       data: {
         labels: Array.from(req.data.labels),
-        datasets: this.transformDatasets(req.data.datasets, req.styling.lineColor)
+        datasets
       },
       options: {
         ...chartGeneratorConfig.options,
@@ -78,22 +80,50 @@ export default class MossChart {
             ...chartGeneratorConfig.options?.plugins?.legend,
             labels: {
               ...chartGeneratorConfig.options?.plugins?.legend?.labels,
-              // usePointStyle: true,
+              usePointStyle: true,
               // boxWidth: 100,
+              // boxHeight: 100,
+              // usePointStyle: true,
+              // padding: 100,
               generateLabels: (chart) => {
-                return chart.data.datasets.map(
+                const lineOptions = chart.options.datasets?.line ?? {}
+
+                const legendItems = datasets.map(
                   (dataset, index): LegendItem => ({
-                    text: dataset.label ?? '',
+                    borderRadius:
+                      typeof dataset.pointRadius === 'number' ? dataset.pointRadius : undefined,
                     datasetIndex: dataset.order ?? index,
-                    fontColor: dataset.borderColor as string,
-                    lineWidth: dataset.borderWidth as number,
-                    fillStyle: dataset.borderColor as string,
-                    pointStyle: 'line'
-                    // pointStyle: dataset.s
+                    fontColor: req.styling.textColor,
+                    lineCap:
+                      typeof dataset.borderCapStyle === 'string'
+                        ? dataset.borderCapStyle
+                        : undefined,
+                    lineDash: (Array.isArray as (arg: unknown) => arg is number[])(
+                      dataset.borderDash
+                    )
+                      ? dataset.borderDash
+                      : undefined,
+                    lineDashOffset:
+                      typeof dataset.borderDashOffset === 'number'
+                        ? dataset.borderDashOffset
+                        : undefined,
+                    lineWidth:
+                      typeof dataset.borderWidth === 'number' ? dataset.borderWidth : undefined,
+                    pointStyle:
+                      typeof dataset.pointStyle === 'string' ? dataset.pointStyle : undefined,
+                    strokeStyle:
+                      typeof dataset.borderColor === 'string'
+                        ? dataset.borderColor
+                        : req.styling.lineColor,
+                    text: dataset.label ?? ''
                   })
                 )
-              },
-              color: req.styling.textColor
+
+                // console.debug(legendItems)
+                // process.exit(0)
+
+                return legendItems
+              }
             }
           }
         },
@@ -171,7 +201,7 @@ export default class MossChart {
     return { min, max } as const
   }
 
-  transformDatasets(
+  private transformDatasets(
     datasets: ReadonlyArray<DataSet>,
     borderColor: Styling['lineColor']
   ): ChartDataset<'line'>[] {
@@ -202,11 +232,11 @@ export default class MossChart {
     return values.map((data): ChartDataset['data'][number] => data.y)
   }
 
-  registerFont(canvasService: ChartJSNodeCanvas, { styling: { fontPath } }: Payload) {
+  private registerFont(canvasService: ChartJSNodeCanvas, { styling: { fontPath } }: Payload) {
     canvasService.registerFont(fontPath, { family: this.getFontFamilyFromPath(fontPath) })
   }
 
-  get(): Promise<Buffer> {
+  public get(): Promise<Buffer> {
     return this.chartService.renderToBuffer(this.chartServicePayload)
   }
 

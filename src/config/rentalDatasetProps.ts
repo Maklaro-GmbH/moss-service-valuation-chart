@@ -9,10 +9,7 @@ export default {
   lineTension: 0,
   borderCapStyle: 'round',
   borderDash: [0, 10],
-  /**
-   * @see https://www.chartjs.org/docs/2.9.4/charts/line.html#line-styling
-   */
-  borderDashOffset: [0, 5] as unknown as number,
+  borderDashOffset: 0,
   data: [],
   bezierCurve: false
 } as ChartDataset<'line'>

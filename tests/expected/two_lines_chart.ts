@@ -50,7 +50,7 @@ export default {
         borderCapStyle: 'round',
         borderColor: '#0e74b6',
         borderDash: [0, 10],
-        borderDashOffset: [0, 5],
+        borderDashOffset: 0,
         borderWidth: 4,
         data: [
           {
