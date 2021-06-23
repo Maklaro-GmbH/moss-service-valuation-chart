@@ -1,10 +1,15 @@
 import { ChartJSNodeCanvas } from 'chartjs-node-canvas'
-import ChartJS, { ChartConfiguration, Chart, ChartDataset, LegendItem, PointStyle } from 'chart.js'
+import ChartJS, {
+  ChartConfiguration,
+  Chart,
+  ChartDataset,
+  LegendItem,
+  CartesianScaleOptions
+} from 'chart.js'
 import { validate } from 'jsonschema'
 import { parse as pathParse } from 'path'
 import Theme from './Theme'
 import makeTicksPlugin from './plugins/ticks'
-import chartGeneratorConfig from './config/chartGeneratorConfig'
 import purchaseDatasetProps from './config/purchaseDatasetProps'
 import rentalDatasetProps from './config/rentalDatasetProps'
 import {
@@ -67,27 +72,26 @@ export default class MossChart {
     const datasets = this.transformDatasets(req.data.datasets, req.styling.lineColor)
 
     const objectComputedFromRequest: ChartConfiguration = {
-      ...chartGeneratorConfig,
+      type: 'line',
       data: {
         labels: Array.from(req.data.labels),
         datasets
       },
       options: {
-        ...chartGeneratorConfig.options,
         plugins: {
-          ...chartGeneratorConfig.options?.plugins,
           legend: {
-            ...chartGeneratorConfig.options?.plugins?.legend,
+            display: true,
+            position: 'bottom',
+            align: 'end',
             labels: {
-              ...chartGeneratorConfig.options?.plugins?.legend?.labels,
               usePointStyle: true,
-              // boxWidth: 100,
-              // boxHeight: 100,
-              // usePointStyle: true,
-              // padding: 100,
-              generateLabels: (chart) => {
-                const lineOptions = chart.options.datasets?.line ?? {}
-
+              font: {
+                size: req.styling.fontSize,
+                family: req.styling.fontPath
+              },
+              color: req.styling.textColor,
+              padding: 30,
+              generateLabels: () => {
                 const legendItems = datasets.map(
                   (dataset, index): LegendItem => ({
                     borderRadius:
@@ -115,7 +119,11 @@ export default class MossChart {
                       typeof dataset.borderColor === 'string'
                         ? dataset.borderColor
                         : req.styling.lineColor,
-                    text: dataset.label ?? ''
+                    text: dataset.label ?? '',
+                    lineJoin:
+                      typeof dataset.borderJoinStyle === 'string'
+                        ? dataset.borderJoinStyle
+                        : undefined
                   })
                 )
 
@@ -128,21 +136,32 @@ export default class MossChart {
           }
         },
         scales: {
-          ...chartGeneratorConfig.options?.scales,
           'x-axis': {
-            ...chartGeneratorConfig.options?.scales?.['x-axis'],
+            display: true,
+            position: 'bottom',
             grid: {
-              ...chartGeneratorConfig.options?.scales?.['x-axis']?.grid,
+              display: false,
+              drawBorder: false,
+              drawOnChartArea: false,
+              lineWidth: 1,
+              tickLength: 10,
               color: req.styling.gridColor
             },
-            // @ts-ignore generic union stuff...
+            ticks: {
+              maxRotation: 0,
+              minRotation: 0,
+              padding: 0
+            },
             title: {
-              // @ts-ignore scale is an union determined by type so `title` may not exists
-              ...chartGeneratorConfig.options?.scales?.['x-axis']?.title,
               color: req.styling.textColor
             }
           },
           ...this.setScalesTicks(this.formLinearScalesFromDataSets(req.data.datasets))
+        },
+        elements: {
+          point: {
+            radius: 0
+          }
         }
       }
     }
@@ -170,6 +189,7 @@ export default class MossChart {
         ): Required<Required<ChartConfiguration>['options']>['scales'] => ({
           [`y-axis-${index}`]: {
             ...this.computeTickRange(data, valueRanges[type]),
+            offset: true,
             type: 'linear',
             display: true,
             position: index % 2 ? 'right' : 'left',
@@ -179,8 +199,9 @@ export default class MossChart {
             },
             title: {
               display: true,
-              text: yAxisLabel
-            }
+              text: yAxisLabel,
+              align: index % 2 ? 'start' : 'end' // this property does not exists in type definitions
+            } as CartesianScaleOptions['title'] & { readonly align?: 'start' | 'center' | 'end' }
           }
         })
       )
