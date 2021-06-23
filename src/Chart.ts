@@ -4,11 +4,11 @@ import ChartJS, {
   Chart,
   ChartDataset,
   LegendItem,
-  CartesianScaleOptions
+  CartesianScaleOptions,
+  Scale
 } from 'chart.js'
 import { validate } from 'jsonschema'
 import { parse as pathParse } from 'path'
-import Theme from './Theme'
 import makeTicksPlugin from './plugins/ticks'
 import purchaseDatasetProps from './config/purchaseDatasetProps'
 import rentalDatasetProps from './config/rentalDatasetProps'
@@ -44,7 +44,6 @@ export default class MossChart {
 
   private createChartService(req: Payload): ChartJSNodeCanvas {
     this.setServiceDefaults(ChartJS, req.styling)
-    this.addChartTheming(ChartJS)
     const chartService = new ChartJSNodeCanvas({
       width: req.width,
       height: req.height
@@ -58,14 +57,6 @@ export default class MossChart {
     chart.defaults.font.size = styling.fontSize
     chart.defaults.color = styling.textColor
     chart.defaults.devicePixelRatio = 2
-  }
-
-  private addChartTheming(chartJsInstance: typeof ChartJS) {
-    const enabled = false
-    if (enabled) {
-      const theme = new Theme(chartJsInstance)
-      theme.init()
-    }
   }
 
   public formChartServicePayload(req: Payload): ChartConfiguration {
@@ -141,14 +132,33 @@ export default class MossChart {
               display: false,
               drawBorder: false,
               drawOnChartArea: false,
+              tickWidth: 1,
               lineWidth: 1,
-              tickLength: 10,
-              color: req.styling.gridColor
+              color: req.styling.gridColor,
+              tickColor: req.styling.gridColor,
+              tickLength: 10
             },
             ticks: {
+              display: true,
               maxRotation: 0,
               minRotation: 0,
-              padding: 0
+              padding: 0,
+              autoSkip: true,
+              includeBounds: false,
+              autoSkipPadding: 20,
+              major: { enabled: true },
+              callback(this: Scale, value, index, { length }) {
+                // skip first and last element
+                if (index === 0 || index === length - 1) {
+                  return undefined
+                }
+
+                if (typeof value === 'number') {
+                  return this.getLabelForValue(value)
+                }
+
+                return value
+              }
             },
             title: {
               color: req.styling.textColor
