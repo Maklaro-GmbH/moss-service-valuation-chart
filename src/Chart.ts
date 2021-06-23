@@ -90,9 +90,9 @@ export default class MossChart {
                 family: req.styling.fontPath
               },
               color: req.styling.textColor,
-              padding: 30,
-              generateLabels: () => {
-                const legendItems = datasets.map(
+              padding: 40,
+              generateLabels: () =>
+                datasets.map(
                   (dataset, index): LegendItem => ({
                     borderRadius:
                       typeof dataset.pointRadius === 'number' ? dataset.pointRadius : undefined,
@@ -111,6 +111,10 @@ export default class MossChart {
                       typeof dataset.borderDashOffset === 'number'
                         ? dataset.borderDashOffset
                         : undefined,
+                    /**
+                     * length of the line is impossible to configure via options
+                     * @see https://github.com/chartjs/Chart.js/blob/v3.3.2/src/plugins/plugin.legend.js#L16
+                     */
                     lineWidth:
                       typeof dataset.borderWidth === 'number' ? dataset.borderWidth : undefined,
                     pointStyle:
@@ -126,12 +130,6 @@ export default class MossChart {
                         : undefined
                   })
                 )
-
-                // console.debug(legendItems)
-                // process.exit(0)
-
-                return legendItems
-              }
             }
           }
         },
