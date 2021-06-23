@@ -15,4 +15,4 @@ export default {
   borderDashOffset: [0, 5] as unknown as number,
   data: [],
   bezierCurve: false
-} as ChartDataset
+} as ChartDataset<'line'>

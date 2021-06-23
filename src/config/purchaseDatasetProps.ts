@@ -6,4 +6,4 @@ export default {
   pointStyle: 'line',
   pointRadius: 0,
   xAxisID: 'x-axis'
-} as ChartDataset
+} as ChartDataset<'line'>

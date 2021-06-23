@@ -174,8 +174,8 @@ export default class MossChart {
   transformDatasets(
     datasets: ReadonlyArray<DataSet>,
     borderColor: Styling['lineColor']
-  ): ChartDataset[] {
-    return datasets.map(({ yAxisLabel, type, ...dataset }, index): ChartDataset => {
+  ): ChartDataset<'line'>[] {
+    return datasets.map(({ yAxisLabel, type, ...dataset }, index): ChartDataset<'line'> => {
       const defaultDatasetProps = {
         [DatasetType.Purchase]: purchaseDatasetProps,
         [DatasetType.Rental]: rentalDatasetProps
@@ -185,10 +185,11 @@ export default class MossChart {
 
       return {
         ...typeRelatedAdditionalProps,
+        cubicInterpolationMode: 'monotone',
+        tension: 0.4,
         label: dataset.label,
         data: this.getChartDatasetDataFromChartDatasetData(dataset.data),
         borderColor,
-        // @ts-ignore generic type union and stuff...
         yAxisID: `y-axis-${index}`,
         xAxisID: `x-axis`
       }
