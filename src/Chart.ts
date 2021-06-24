@@ -1,4 +1,4 @@
-import { ChartJSNodeCanvas } from 'chartjs-node-canvas'
+import { ChartJSNodeCanvas, MimeType } from 'chartjs-node-canvas'
 import ChartJS, {
   ChartConfiguration,
   Chart,
@@ -74,7 +74,7 @@ export default class MossChart {
             /**
              * when there is only one line/dataset that chart is bounded to the right side of the canvas
              */
-            right: req.data.datasets.length === 1 ? 5 : undefined
+            right: req.data.datasets.length === 1 ? 25 : undefined,
           }
         },
         plugins: {
@@ -274,8 +274,11 @@ export default class MossChart {
     canvasService.registerFont(fontPath, { family: this.getFontFamilyFromPath(fontPath) })
   }
 
-  public get(): Promise<Buffer> {
-    return this.chartService.renderToBuffer(this.chartServicePayload)
+  /**
+   * @returns rendered chart
+   */
+  public get(mime: MimeType = 'image/png'): Promise<Buffer> {
+    return this.chartService.renderToBuffer(this.chartServicePayload, mime)
   }
 
   private setScalesTicks(
