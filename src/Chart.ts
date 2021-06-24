@@ -69,6 +69,14 @@ export default class MossChart {
         datasets
       },
       options: {
+        layout: {
+          padding: {
+            /**
+             * when there is only one line/dataset that chart is bounded to the right side of the canvas
+             */
+            right: req.data.datasets.length === 1 ? 5 : undefined
+          }
+        },
         plugins: {
           legend: {
             display: true,
@@ -126,12 +134,13 @@ export default class MossChart {
         },
         scales: {
           'x-axis': {
+            type: 'category',
             display: true,
             position: 'bottom',
             grid: {
               display: false,
               drawBorder: true,
-              drawOnChartArea: false,
+              drawOnChartArea: true,
               tickWidth: 1,
               lineWidth: 1,
               color: req.styling.gridColor,
