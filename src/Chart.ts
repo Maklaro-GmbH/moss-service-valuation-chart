@@ -130,7 +130,7 @@ export default class MossChart {
             position: 'bottom',
             grid: {
               display: false,
-              drawBorder: false,
+              drawBorder: true,
               drawOnChartArea: false,
               tickWidth: 1,
               lineWidth: 1,
