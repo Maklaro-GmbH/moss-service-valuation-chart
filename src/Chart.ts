@@ -20,7 +20,9 @@ import {
   DataSetData,
   DatasetType
 } from './schemas/payload'
+import { overwriteLegendMethods } from './plugins/legend'
 
+overwriteLegendMethods()
 Chart.register(makeTicksPlugin({ scaleName: 'x-axis' }))
 
 export default class MossChart {
@@ -74,7 +76,7 @@ export default class MossChart {
             /**
              * when there is only one line/dataset that chart is bounded to the right side of the canvas
              */
-            right: req.data.datasets.length === 1 ? 25 : undefined,
+            right: req.data.datasets.length === 1 ? 25 : undefined
           }
         },
         plugins: {
@@ -82,6 +84,7 @@ export default class MossChart {
             display: true,
             position: 'bottom',
             align: 'end',
+            pointLineLength: 50,
             labels: {
               usePointStyle: true,
               font: {
