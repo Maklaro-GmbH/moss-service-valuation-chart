@@ -209,7 +209,7 @@ export default class MossChart {
         ): Required<Required<ChartConfiguration>['options']>['scales'] => ({
           [`y-axis-${index}`]: {
             ...this.computeTickRange(data, valueRanges[type]),
-            offset: true,
+            offset: false,
             type: 'linear',
             display: true,
             position: index % 2 ? 'right' : 'left',
