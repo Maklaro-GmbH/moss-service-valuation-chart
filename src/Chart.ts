@@ -10,17 +10,17 @@ import ChartJS, {
 import { validate } from 'jsonschema'
 import { parse as pathParse } from 'path'
 import makeTicksPlugin from './plugins/ticks'
+import { overwriteLegendMethods } from './plugins/legend'
 import purchaseDatasetProps from './config/purchaseDatasetProps'
 import rentalDatasetProps from './config/rentalDatasetProps'
 import {
   payloadSchema,
   Payload,
   Styling,
-  DataSet,
+  PayloadDataset,
   DataSetData,
   DatasetType
 } from './schemas/payload'
-import { overwriteLegendMethods } from './plugins/legend'
 
 overwriteLegendMethods()
 Chart.register(makeTicksPlugin({ scaleName: 'x-axis' }))
@@ -30,11 +30,15 @@ export default class MossChart {
 
   private readonly chartServicePayload: ChartConfiguration
 
-  constructor(req: unknown) {
-    this.assertPayloadSchema(req)
+  /**
+   * @param payload raw payload, passed value is validated internally
+   * @throws when provided {@link payload} is invalid
+   */
+  constructor(payload: unknown) {
+    this.assertPayloadSchema(payload)
 
-    this.chartService = this.createChartService(req)
-    this.chartServicePayload = this.formChartServicePayload(req)
+    this.chartService = this.createChartService(payload)
+    this.chartServicePayload = this.formChartServicePayload(payload)
   }
 
   private assertPayloadSchema(req: unknown): asserts req is Payload {
@@ -46,11 +50,14 @@ export default class MossChart {
 
   private createChartService(req: Payload): ChartJSNodeCanvas {
     this.setServiceDefaults(ChartJS, req.styling)
+
     const chartService = new ChartJSNodeCanvas({
       width: req.width,
       height: req.height
     })
+
     this.registerFont(chartService, req)
+
     return chartService
   }
 
@@ -116,6 +123,7 @@ export default class MossChart {
                     /**
                      * length of the line is impossible to configure via options
                      * @see https://github.com/chartjs/Chart.js/blob/v3.3.2/src/plugins/plugin.legend.js#L16
+                     * {@link overwriteLegendMethods}
                      */
                     lineWidth:
                       typeof dataset.borderWidth === 'number' ? dataset.borderWidth : undefined,
@@ -176,7 +184,7 @@ export default class MossChart {
               color: req.styling.textColor
             }
           },
-          ...this.setScalesTicks(this.formLinearScalesFromDataSets(req.data.datasets))
+          ...this.formLinearScalesFromDataSets(req.data.datasets)
         },
         elements: {
           point: {
@@ -190,7 +198,7 @@ export default class MossChart {
   }
 
   private formLinearScalesFromDataSets(
-    datasets: ReadonlyArray<DataSet>
+    datasets: ReadonlyArray<PayloadDataset>
   ): Required<Required<ChartConfiguration>['options']>['scales'] {
     const valueRanges = {
       purchase: 100000,
@@ -206,24 +214,52 @@ export default class MossChart {
         (
           { yAxisLabel, type, data },
           index
-        ): Required<Required<ChartConfiguration>['options']>['scales'] => ({
-          [`y-axis-${index}`]: {
-            ...this.computeTickRange(data, valueRanges[type]),
-            offset: false,
-            type: 'linear',
-            display: true,
-            position: index % 2 ? 'right' : 'left',
-            beginAtZero: false,
-            ticks: {
-              maxTicksLimit: 5
-            },
-            title: {
+        ): Required<Required<ChartConfiguration>['options']>['scales'] => {
+          const position = index % 2 ? 'right' : 'left'
+          return {
+            [`y-axis-${index}`]: {
+              ...this.computeTickRange(data, valueRanges[type]),
+              offset: false,
+              type: 'linear',
               display: true,
-              text: yAxisLabel,
-              align: index % 2 ? 'start' : 'end' // this property does not exists in type definitions
-            } as CartesianScaleOptions['title'] & { readonly align?: 'start' | 'center' | 'end' }
+              position,
+              beginAtZero: false,
+              ticks: {
+                maxTicksLimit: 5,
+                callback: (value) => {
+                  if (position === 'left') {
+                    return value
+                      .toLocaleString(undefined, {
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0
+                      })
+                      .replace(/,/g, '.')
+                  }
+
+                  if (typeof value === 'number') {
+                    if (value % 1 === 0) {
+                      return value.toString() + ',-'
+                    }
+
+                    return value
+                      .toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                      })
+                      .replace('.', ',')
+                  }
+
+                  return value
+                }
+              },
+              title: {
+                display: true,
+                text: yAxisLabel,
+                align: index % 2 ? 'start' : 'end' // this property does not exists in type definitions
+              } as CartesianScaleOptions['title'] & { readonly align?: 'start' | 'center' | 'end' }
+            }
           }
-        })
+        }
       )
     )
   }
@@ -242,8 +278,11 @@ export default class MossChart {
     return { min, max } as const
   }
 
+  /**
+   * transforms the payload dataset into chart datasets (y axis values)
+   */
   private transformDatasets(
-    datasets: ReadonlyArray<DataSet>,
+    datasets: ReadonlyArray<PayloadDataset>,
     borderColor: Styling['lineColor']
   ): ChartDataset<'line'>[] {
     return datasets.map(({ yAxisLabel, type, ...dataset }, index): ChartDataset<'line'> => {
@@ -259,7 +298,7 @@ export default class MossChart {
         cubicInterpolationMode: 'monotone',
         tension: 0.4,
         label: dataset.label,
-        data: this.getChartDatasetDataFromChartDatasetData(dataset.data),
+        data: dataset.data.map((data) => data.y),
         borderColor,
         yAxisID: `y-axis-${index}`,
         xAxisID: `x-axis`
@@ -267,12 +306,9 @@ export default class MossChart {
     })
   }
 
-  private getChartDatasetDataFromChartDatasetData(
-    values: ReadonlyArray<DataSetData>
-  ): ChartDataset['data'] {
-    return values.map((data): ChartDataset['data'][number] => data.y)
-  }
-
+  /**
+   * registers the payload's font in provided chart canvas
+   */
   private registerFont(canvasService: ChartJSNodeCanvas, { styling: { fontPath } }: Payload) {
     canvasService.registerFont(fontPath, { family: this.getFontFamilyFromPath(fontPath) })
   }
@@ -282,49 +318,6 @@ export default class MossChart {
    */
   public get(mime: MimeType = 'image/png'): Promise<Buffer> {
     return this.chartService.renderToBuffer(this.chartServicePayload, mime)
-  }
-
-  private setScalesTicks(
-    scales: Required<Required<ChartConfiguration>['options']>['scales']
-  ): Required<Required<ChartConfiguration>['options']>['scales'] {
-    return Object.assign(
-      {},
-      ...Object.entries(scales).map(
-        ([id, scale]): Required<Required<ChartConfiguration>['options']>['scales'] => ({
-          [id]: {
-            ...scale,
-            ticks: {
-              ...scale!.ticks,
-              callback: (value) => {
-                if ((scale as any)!.position === 'left') {
-                  return value
-                    .toLocaleString(undefined, {
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 0
-                    })
-                    .replace(/,/g, '.')
-                }
-
-                if (typeof value === 'number') {
-                  if (value % 1 === 0) {
-                    return value.toString() + ',-'
-                  }
-
-                  return value
-                    .toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2
-                    })
-                    .replace('.', ',')
-                }
-
-                return value
-              }
-            }
-          }
-        })
-      )
-    )
   }
 
   private getFontFamilyFromPath(path: string): string {

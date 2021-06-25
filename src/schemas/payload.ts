@@ -6,11 +6,11 @@ export interface Payload {
 }
 
 export interface PayloadData {
-  readonly datasets: ReadonlyArray<DataSet>
+  readonly datasets: ReadonlyArray<PayloadDataset>
   readonly labels: ReadonlyArray<string>
 }
 
-export interface DataSet {
+export interface PayloadDataset {
   readonly data: ReadonlyArray<DataSetData>
   readonly label: string
   readonly type: DatasetType

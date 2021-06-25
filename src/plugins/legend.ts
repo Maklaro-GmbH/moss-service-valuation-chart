@@ -12,10 +12,27 @@ import {
 
 declare module 'chart.js' {
   interface LegendOptions {
+    /**
+     * missing original type
+     */
     rtl?: unknown
+    /**
+     * missing original type
+     */
     textDirection?: unknown
+    /**
+     * custom property
+     *
+     * specify what length should the point line have, working only when `usePintStyle` is used
+     */
     pointLineLength?: number
+    /**
+     * missing original type
+     */
     maxHeight?: number
+    /**
+     * missing original type
+     */
     maxWidth?: number
   }
 }
@@ -26,7 +43,7 @@ declare module 'chart.js' {
 declare class Legend extends Element<{}, LegendOptions> {
   constructor(config: LegendOptions)
   _added: false
-  legendHitBoxes: []
+  legendHitBoxes: { left: number; top: number; row: number; width: number; height: number }[]
   _hoveredItem: null
   doughnutMode: false
   chart: Chart
@@ -65,8 +82,8 @@ declare class Legend extends Element<{}, LegendOptions> {
 
 const PrivateLegend = (LegendPlugin as unknown as { readonly _element: typeof Legend })._element
 
-const defaultPrivateDrawMethod = PrivateLegend.prototype._draw
-const defaultPrivateFitMethod = PrivateLegend.prototype.fit
+const originalPrivateDrawMethod = PrivateLegend.prototype._draw
+const originalPrivateFitMethod = PrivateLegend.prototype.fit
 
 export function overwriteLegendMethods() {
   const {
@@ -91,11 +108,8 @@ export function overwriteLegendMethods() {
     let { boxHeight = fontSize, boxWidth = fontSize } = labelOpts
 
     if (labelOpts.usePointStyle) {
-      if (typeof pointLineLength === 'number') {
-        boxWidth = pointLineLength
-      } else {
-        boxWidth = Math.min(boxWidth, fontSize)
-      }
+      boxWidth =
+        typeof pointLineLength === 'number' ? pointLineLength : Math.min(boxWidth, fontSize)
       boxHeight = Math.min(boxHeight, fontSize)
     }
 
@@ -106,6 +120,9 @@ export function overwriteLegendMethods() {
     }
   }
 
+  /**
+   * the internal `fit` mthod with some changes regarding drawing point lines
+   */
   PrivateLegend.prototype.fit = function fit(this: Legend) {
     const { options, ctx } = this
 
@@ -141,7 +158,10 @@ export function overwriteLegendMethods() {
     this.height = Math.min(height, options.maxHeight || this.maxHeight!)
   }
 
-  PrivateLegend.prototype._draw = function _draw(this: Legend) {
+  /**
+   * the internal `_draw` mthod with some changes regarding drawing point lines
+   */
+  PrivateLegend.prototype._draw = function _draw() {
     const { options: opts, columnSizes, lineWidths, ctx } = this
     const { align, labels: labelOpts } = opts
     const defaultColor = defaults.color
@@ -323,6 +343,6 @@ export function overwriteLegendMethods() {
 }
 
 export function restoreDefaultLegendMethods() {
-  PrivateLegend.prototype.fit = defaultPrivateFitMethod
-  PrivateLegend.prototype._draw = defaultPrivateDrawMethod
+  PrivateLegend.prototype.fit = originalPrivateFitMethod
+  PrivateLegend.prototype._draw = originalPrivateDrawMethod
 }
