@@ -13,27 +13,11 @@ import {
 declare module 'chart.js' {
   interface LegendOptions {
     /**
-     * missing original type
-     */
-    rtl?: unknown
-    /**
-     * missing original type
-     */
-    textDirection?: unknown
-    /**
      * custom property
      *
      * specify what length should the point line have, working only when `usePintStyle` is used
      */
     pointLineLength?: number
-    /**
-     * missing original type
-     */
-    maxHeight?: number
-    /**
-     * missing original type
-     */
-    maxWidth?: number
   }
 }
 
