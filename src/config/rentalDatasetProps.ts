@@ -1,6 +1,6 @@
-import type { ChartDataSets } from 'chart.js'
+import type { ChartDataset } from 'chart.js'
 
-export = {
+export default {
   fill: false,
   borderWidth: 4,
   pointStyle: 'line',
@@ -9,9 +9,7 @@ export = {
   lineTension: 0,
   borderCapStyle: 'round',
   borderDash: [0, 10],
-  /**
-   * @see https://www.chartjs.org/docs/2.9.4/charts/line.html#line-styling
-   */
-  borderDashOffset: [0, 5] as unknown as number,
+  borderDashOffset: 0,
+  data: [],
   bezierCurve: false
-} as ChartDataSets
+} as ChartDataset<'line'>

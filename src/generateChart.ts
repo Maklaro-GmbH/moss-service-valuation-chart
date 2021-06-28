@@ -2,7 +2,7 @@ import Chart from './Chart'
 
 type Lazy<T> = T | PromiseLike<T>
 
-type Input<T> = Lazy<Iterable<Lazy<T>> | AsyncIterable<Lazy<T>>>
+type Input<T> = Lazy<Iterable<Lazy<T>> | Lazy<AsyncIterable<Lazy<T>>>>
 
 async function accumulateInput(input: Input<string>): Promise<string> {
   let accumulator: string = ''

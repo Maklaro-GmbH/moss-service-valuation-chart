@@ -1,103 +1,195 @@
-import { ChartJSNodeCanvas } from 'chartjs-node-canvas'
-import ChartJS, { ChartConfiguration, ChartDataSets, ChartYAxe } from 'chart.js'
+import { ChartJSNodeCanvas, MimeType } from 'chartjs-node-canvas'
+import ChartJS, {
+  ChartConfiguration,
+  Chart,
+  ChartDataset,
+  LegendItem,
+  CartesianScaleOptions,
+  Scale
+} from 'chart.js'
 import { validate } from 'jsonschema'
 import { parse as pathParse } from 'path'
-
-import Theme from './Theme'
-import ticks from './plugins/ticks'
-import chartGeneratorConfig from './config/chartGeneratorConfig'
+import makeTicksPlugin from './plugins/ticks'
+import { overwriteLegendMethods } from './plugins/legend'
 import purchaseDatasetProps from './config/purchaseDatasetProps'
 import rentalDatasetProps from './config/rentalDatasetProps'
 import {
   payloadSchema,
   Payload,
   Styling,
-  DataSet,
+  PayloadDataset,
   DataSetData,
   DatasetType
 } from './schemas/payload'
 
-ChartJS.plugins.register(ticks)
+overwriteLegendMethods()
+Chart.register(makeTicksPlugin({ scaleName: 'x-axis' }))
 
-export = class Chart {
-  readonly chartService: ChartJSNodeCanvas
+export default class MossChart {
+  private readonly chartService: ChartJSNodeCanvas
 
-  readonly chartServicePayload: ChartConfiguration
+  private readonly chartServicePayload: ChartConfiguration
 
-  constructor(req: unknown) {
-    this.assertPayloadSchema(req)
+  /**
+   * @param payload raw payload, passed value is validated internally
+   * @throws when provided {@link payload} is invalid
+   */
+  constructor(payload: unknown) {
+    this.assertPayloadSchema(payload)
 
-    this.chartService = this.createChartService(req)
-    this.chartServicePayload = this.formChartServicePayload(req)
+    this.chartService = this.createChartService(payload)
+    this.chartServicePayload = this.formChartServicePayload(payload)
   }
 
-  assertPayloadSchema(req: unknown): asserts req is Payload {
+  private assertPayloadSchema(req: unknown): asserts req is Payload {
     const validationResult = validate(req, payloadSchema)
     if (!validationResult.valid) {
       throw validationResult.toString()
     }
   }
 
-  createChartService(req: Payload): ChartJSNodeCanvas {
-    this.setServiceGlobalDefaults(ChartJS, req.styling)
-    this.addChartTheming(ChartJS)
+  private createChartService(req: Payload): ChartJSNodeCanvas {
+    this.setServiceDefaults(ChartJS, req.styling)
+
     const chartService = new ChartJSNodeCanvas({
       width: req.width,
-      height: req.height,
-      // @ts-ignore
-      chartCallback: () => ChartJS
+      height: req.height
     })
+
     this.registerFont(chartService, req)
+
     return chartService
   }
 
-  setServiceGlobalDefaults(chartJsInstance: typeof ChartJS, styling: Styling) {
-    chartJsInstance.defaults.global = {
-      ...chartJsInstance.defaults.global,
-      defaultFontFamily: this.getFontFamilyFromPath(styling.fontPath),
-      defaultFontSize: styling.fontSize,
-      defaultFontColor: styling.textColor,
-      devicePixelRatio: 2
-    }
+  private setServiceDefaults(chart: typeof ChartJS, styling: Styling) {
+    chart.defaults.font.family = this.getFontFamilyFromPath(styling.fontPath)
+    chart.defaults.font.size = styling.fontSize
+    chart.defaults.color = styling.textColor
+    chart.defaults.devicePixelRatio = 2
   }
 
-  addChartTheming(chartJsInstance: typeof ChartJS) {
-    const theme = new Theme(chartJsInstance)
-    theme.init()
-  }
+  public formChartServicePayload(req: Payload): ChartConfiguration {
+    const datasets = this.transformDatasets(req.data.datasets, req.styling.lineColor)
 
-  formChartServicePayload(req: Payload): ChartConfiguration {
     const objectComputedFromRequest: ChartConfiguration = {
-      ...chartGeneratorConfig,
+      type: 'line',
       data: {
-        labels: req.data.labels as Array<string>,
-        datasets: this.transformDatasets(req.data.datasets, req.styling.lineColor)
+        labels: Array.from(req.data.labels),
+        datasets
       },
       options: {
-        ...chartGeneratorConfig.options,
-        legend: {
-          ...chartGeneratorConfig.options.legend,
-          labels: {
-            ...chartGeneratorConfig.options.legend.labels,
-            fontColor: req.styling.textColor
+        layout: {
+          padding: {
+            /**
+             * when there is only one line/dataset that chart is bounded to the right side of the canvas
+             */
+            right: req.data.datasets.length === 1 ? 25 : undefined
+          }
+        },
+        plugins: {
+          legend: {
+            display: true,
+            position: 'bottom',
+            align: 'end',
+            pointLineLength: 50,
+            labels: {
+              usePointStyle: true,
+              font: {
+                size: req.styling.fontSize,
+                family: req.styling.fontPath
+              },
+              color: req.styling.textColor,
+              padding: 40,
+              generateLabels: () =>
+                datasets.map(
+                  (dataset, index): LegendItem => ({
+                    borderRadius:
+                      typeof dataset.pointRadius === 'number' ? dataset.pointRadius : undefined,
+                    datasetIndex: dataset.order ?? index,
+                    fontColor: req.styling.textColor,
+                    lineCap:
+                      typeof dataset.borderCapStyle === 'string'
+                        ? dataset.borderCapStyle
+                        : undefined,
+                    lineDash: (Array.isArray as (arg: unknown) => arg is number[])(
+                      dataset.borderDash
+                    )
+                      ? dataset.borderDash
+                      : undefined,
+                    lineDashOffset:
+                      typeof dataset.borderDashOffset === 'number'
+                        ? dataset.borderDashOffset
+                        : undefined,
+                    /**
+                     * length of the line is impossible to configure via options
+                     * @see https://github.com/chartjs/Chart.js/blob/v3.3.2/src/plugins/plugin.legend.js#L16
+                     * {@link overwriteLegendMethods}
+                     */
+                    lineWidth:
+                      typeof dataset.borderWidth === 'number' ? dataset.borderWidth : undefined,
+                    pointStyle:
+                      typeof dataset.pointStyle === 'string' ? dataset.pointStyle : undefined,
+                    strokeStyle:
+                      typeof dataset.borderColor === 'string'
+                        ? dataset.borderColor
+                        : req.styling.lineColor,
+                    text: dataset.label ?? '',
+                    lineJoin:
+                      typeof dataset.borderJoinStyle === 'string'
+                        ? dataset.borderJoinStyle
+                        : undefined
+                  })
+                )
+            }
           }
         },
         scales: {
-          ...chartGeneratorConfig.options.scales,
-          xAxes: [
-            {
-              ...chartGeneratorConfig.options.scales.xAxes[0],
-              gridLines: {
-                ...chartGeneratorConfig.options.scales.xAxes[0].gridLines,
-                color: req.styling.gridColor
-              },
-              scaleLabel: {
-                ...chartGeneratorConfig.options.scales.xAxes[0].scaleLabel,
-                fontColor: req.styling.textColor
+          'x-axis': {
+            type: 'category',
+            display: true,
+            position: 'bottom',
+            grid: {
+              display: false,
+              drawBorder: true,
+              drawOnChartArea: true,
+              tickWidth: 1,
+              lineWidth: 1,
+              color: req.styling.gridColor,
+              tickColor: req.styling.gridColor,
+              tickLength: 10
+            },
+            ticks: {
+              display: true,
+              maxRotation: 0,
+              minRotation: 0,
+              padding: 0,
+              autoSkip: true,
+              includeBounds: false,
+              autoSkipPadding: 20,
+              major: { enabled: true },
+              callback(this: Scale, value, index, { length }) {
+                // skip first and last element
+                if (index === 0 || index === length - 1) {
+                  return undefined
+                }
+
+                if (typeof value === 'number') {
+                  return this.getLabelForValue(value)
+                }
+
+                return value
               }
+            },
+            title: {
+              color: req.styling.textColor
             }
-          ],
-          yAxes: this.setAxesTicks(this.formYAxesFromDatasets(req.data.datasets))
+          },
+          ...this.formLinearScalesFromDataSets(req.data.datasets)
+        },
+        elements: {
+          point: {
+            radius: 0
+          }
         }
       }
     }
@@ -105,32 +197,74 @@ export = class Chart {
     return objectComputedFromRequest
   }
 
-  formYAxesFromDatasets(datasets: ReadonlyArray<DataSet>) {
+  private formLinearScalesFromDataSets(
+    datasets: ReadonlyArray<PayloadDataset>
+  ): Required<Required<ChartConfiguration>['options']>['scales'] {
     const valueRanges = {
       purchase: 100000,
       rental: 2
-    }
+    } as const
 
-    return datasets.map(({ yAxisLabel, type, data }, index) => ({
-      display: true,
-      color: 'rgba(150, 150, 150, 1)',
-      type: 'linear',
-      id: `y-axis-${index}`,
-      position: index % 2 ? 'right' : 'left',
-      scaleLabel: {
-        labelString: yAxisLabel,
-        display: true,
-        align: 'end'
-      },
-      ticks: {
-        beginAtZero: false,
-        maxTicksLimit: 5,
-        ...this.computeTickRange(data, valueRanges[type])
-      }
-    }))
+    /**
+     * @todo replace with `Object.fromEntries` when possible
+     */
+    return Object.assign(
+      {},
+      ...datasets.map(
+        (
+          { yAxisLabel, type, data },
+          index
+        ): Required<Required<ChartConfiguration>['options']>['scales'] => {
+          const position = index % 2 ? 'right' : 'left'
+          return {
+            [`y-axis-${index}`]: {
+              ...this.computeTickRange(data, valueRanges[type]),
+              offset: false,
+              type: 'linear',
+              display: true,
+              position,
+              beginAtZero: false,
+              ticks: {
+                maxTicksLimit: 5,
+                callback: (value) => {
+                  if (position === 'left') {
+                    return value
+                      .toLocaleString(undefined, {
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0
+                      })
+                      .replace(/,/g, '.')
+                  }
+
+                  if (typeof value === 'number') {
+                    if (value % 1 === 0) {
+                      return value.toString() + ',-'
+                    }
+
+                    return value
+                      .toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                      })
+                      .replace('.', ',')
+                  }
+
+                  return value
+                }
+              },
+              title: {
+                display: true,
+                text: yAxisLabel,
+                align: index % 2 ? 'start' : 'end' // this property does not exists in type definitions
+              } as CartesianScaleOptions['title'] & { readonly align?: 'start' | 'center' | 'end' }
+            }
+          }
+        }
+      )
+    )
   }
 
-  computeTickRange(data: ReadonlyArray<DataSetData>, range: number) {
+  public computeTickRange(data: ReadonlyArray<DataSetData>, range: number) {
     if (!range) throw 'range must be defined'
     const values = data.map(({ y }) => y)
     let max = Math.ceil(Math.max(...values) / range) * range
@@ -141,71 +275,49 @@ export = class Chart {
     if (Math.min(...values) <= min) {
       min -= range
     }
-    return { min, max }
+    return { min, max } as const
   }
 
-  transformDatasets(
-    datasets: ReadonlyArray<DataSet>,
+  /**
+   * transforms the payload dataset into chart datasets (y axis values)
+   */
+  private transformDatasets(
+    datasets: ReadonlyArray<PayloadDataset>,
     borderColor: Styling['lineColor']
-  ): ChartDataSets[] {
-    return datasets.map(({ yAxisLabel, type, ...dataset }, index): ChartDataSets => {
+  ): ChartDataset<'line'>[] {
+    return datasets.map(({ yAxisLabel, type, ...dataset }, index): ChartDataset<'line'> => {
       const defaultDatasetProps = {
         [DatasetType.Purchase]: purchaseDatasetProps,
         [DatasetType.Rental]: rentalDatasetProps
       } as const
       const typeRelatedAdditionalProps = defaultDatasetProps[type]
-      if (!typeRelatedAdditionalProps) throw 'Unknown dataset type'
+      if (!typeRelatedAdditionalProps) throw `Unknown dataset type: ${JSON.stringify(type)}`
 
       return {
         ...typeRelatedAdditionalProps,
+        cubicInterpolationMode: 'monotone',
+        tension: 0.4,
         label: dataset.label,
-        data: Array.from(dataset.data),
+        data: dataset.data.map((data) => data.y),
         borderColor,
-        yAxisID: `y-axis-${index}`
+        yAxisID: `y-axis-${index}`,
+        xAxisID: `x-axis`
       }
     })
   }
 
-  registerFont(canvasService: ChartJSNodeCanvas, { styling: { fontPath } }: Payload) {
+  /**
+   * registers the payload's font in provided chart canvas
+   */
+  private registerFont(canvasService: ChartJSNodeCanvas, { styling: { fontPath } }: Payload) {
     canvasService.registerFont(fontPath, { family: this.getFontFamilyFromPath(fontPath) })
   }
 
-  get(): Promise<Buffer> {
-    return this.chartService.renderToBuffer(this.chartServicePayload)
-  }
-
-  private setAxesTicks(yAxes: ReadonlyArray<ChartYAxe>): Array<ChartYAxe> {
-    return yAxes.map((yAxe) => ({
-      ...yAxe,
-      ticks: {
-        ...yAxe.ticks,
-        callback: (value) => {
-          if (yAxe.position === 'left') {
-            return value
-              .toLocaleString(undefined, {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-              })
-              .replace(/,/g, '.')
-          }
-
-          if (typeof value === 'number') {
-            if (value % 1 === 0) {
-              return value.toString() + ',-'
-            }
-
-            return value
-              .toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-              })
-              .replace('.', ',')
-          }
-
-          return value
-        }
-      }
-    }))
+  /**
+   * @returns rendered chart
+   */
+  public get(mime: MimeType = 'image/png'): Promise<Buffer> {
+    return this.chartService.renderToBuffer(this.chartServicePayload, mime)
   }
 
   private getFontFamilyFromPath(path: string): string {

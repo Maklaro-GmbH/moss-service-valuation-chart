@@ -3,24 +3,8 @@ import type { Payload } from '../src/schemas/payload'
 import oneLinePayload from './fixtures/payloads/one_line.json'
 import twoLinesPayload from './fixtures/payloads/two_lines.json'
 
-describe('Chart.js', function () {
+describe(Chart, () => {
   const chart = new Chart(oneLinePayload)
-
-  describe('formChartServicePayload', function () {
-    it('should form expected object for one line chart', function () {
-      const expected = require('./expected/one_line_chart')
-
-      const result = chart.formChartServicePayload(oneLinePayload as Payload)
-      expect(result).toEqual(expected)
-    })
-
-    it('should form expected object for two lines chart', function () {
-      const expected = require('./expected/two_lines_chart')
-
-      const result = chart.formChartServicePayload(require('./fixtures/payloads/two_lines.json'))
-      expect(result).toEqual(expected)
-    })
-  })
 
   describe('computeTickRange', function () {
     const { data } = twoLinesPayload.data.datasets[0]
