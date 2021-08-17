@@ -7,11 +7,12 @@ import {
   ChartEvent,
   defaults,
   // @ts-ignore no type defs
-  helpers
+  helpers,
+  ChartType,
 } from 'chart.js'
 
 declare module 'chart.js' {
-  interface LegendOptions {
+  interface LegendOptions<TType extends ChartType> {
     /**
      * custom property
      *
@@ -24,14 +25,15 @@ declare module 'chart.js' {
 /**
  * the internal `chart.js` Label class
  */
-declare class Legend extends Element<{}, LegendOptions> {
-  constructor(config: LegendOptions)
+// @ts-expect-error `Element.prototype` does not accept generics
+declare class Legend extends Element<{}, LegendOptions<ChartType>> {
+  constructor(config: LegendOptions<ChartType>)
   _added: false
   legendHitBoxes: { left: number; top: number; row: number; width: number; height: number }[]
   _hoveredItem: null
   doughnutMode: false
   chart: Chart
-  options: LegendOptions
+  options: LegendOptions<ChartType>
   ctx: CanvasRenderingContext2D
   legendItems?: LegendItem[]
   columnSizes?: { height: number; width: number }[]
@@ -85,9 +87,9 @@ export function overwriteLegendMethods() {
   } = helpers
 
   function getBoxSize(
-    labelOpts: LegendOptions['labels'],
+    labelOpts: LegendOptions<ChartType>['labels'],
     fontSize: number,
-    pointLineLength: LegendOptions['pointLineLength']
+    pointLineLength: LegendOptions<ChartType>['pointLineLength']
   ) {
     let { boxHeight = fontSize, boxWidth = fontSize } = labelOpts
 
