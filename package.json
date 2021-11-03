@@ -4,7 +4,8 @@
   "description": "",
   "scripts": {
     "pretest": "tsc",
-    "test": "jest"
+    "test": "jest",
+    "lint": "standard"
   },
   "repository": {
     "type": "git",
@@ -28,8 +29,9 @@
     "@types/node": "^14.16.0",
     "jest": "^27.1.0",
     "jest-image-snapshot": "^4.0.0",
-    "prettier": "^2.2.1",
-    "ts-jest": "^27.0.5"
+    "standard": "^16.0.4",
+    "ts-jest": "^27.0.5",
+    "ts-standard": "^10.0.0"
   },
   "engines": {
     "node": "^14.17.5"
@@ -40,5 +42,8 @@
     "setupFilesAfterEnv": [
       "<rootDir>/tests/jest-setup.ts"
     ]
+  },
+  "ts-standard": {
+    "project": "./tsconfig.json"
   }
 }
