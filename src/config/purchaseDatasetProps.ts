@@ -1,9 +1,12 @@
 import type { ChartDataset } from 'chart.js'
 
-export default {
+const value: ChartDataset<'line'> = {
   fill: false,
   borderWidth: 4,
   pointStyle: 'line',
   pointRadius: 0,
-  xAxisID: 'x-axis'
-} as ChartDataset<'line'>
+  xAxisID: 'x-axis',
+  data: []
+}
+
+export default value

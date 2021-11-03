@@ -11,11 +11,11 @@ interface GridLineItem {
   readonly y2: number
   readonly width: number
   readonly color: string
-  readonly borderDash: ReadonlyArray<unknown>
+  readonly borderDash: readonly unknown[]
   readonly borderDashOffset: number
   readonly tickWidth: number
   readonly tickColor: string
-  readonly tickBorderDash: ReadonlyArray<unknown>
+  readonly tickBorderDash: readonly unknown[]
   readonly tickBorderDashOffset: unknown
   readonly tickLength?: number
 }
@@ -30,7 +30,7 @@ interface LabelItem {
   readonly textOffset: number
   readonly textAlign: TextAlign
   readonly textBaseline: CanvasTextBaseline
-  readonly translation: ReadonlyArray<unknown>
+  readonly translation: readonly unknown[]
   readonly backdrop: undefined
 }
 
@@ -39,23 +39,23 @@ interface LabelSize {
   readonly last: Readonly<Record<'width' | 'height', number>>
   readonly widest: Readonly<Record<'width' | 'height', number>>
   readonly highest: Readonly<Record<'width' | 'height', number>>
-  readonly widths: ReadonlyArray<number>
-  readonly heights: ReadonlyArray<number>
+  readonly widths: readonly number[]
+  readonly heights: readonly number[]
 }
 
 interface AfterDrawScale extends Scale<CartesianScaleOptions> {
-  readonly _gridLineItems: ReadonlyArray<GridLineItem>
-  readonly _labelItems: ReadonlyArray<LabelItem>
+  readonly _gridLineItems: readonly GridLineItem[]
+  readonly _labelItems: readonly LabelItem[]
   readonly _labelSizes: LabelSize
 }
 
-export default function makeTicksPlugin({ scaleName }: { readonly scaleName: string }): Plugin {
+export default function makeTicksPlugin ({ scaleName }: { readonly scaleName: string }): Plugin {
   return {
     id: 'ticks-plugin',
-    afterDraw(chart) {
+    afterDraw (chart) {
       const scale = chart.scales[scaleName] as AfterDrawScale | undefined
 
-      if (!scale) {
+      if (scale == null) {
         throw new Error(`chart scale named ${JSON.stringify(scaleName)} does not exists`)
       }
 

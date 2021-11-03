@@ -6,12 +6,12 @@ export interface Payload {
 }
 
 export interface PayloadData {
-  readonly datasets: ReadonlyArray<PayloadDataset>
-  readonly labels: ReadonlyArray<string>
+  readonly datasets: readonly PayloadDataset[]
+  readonly labels: readonly string[]
 }
 
 export interface PayloadDataset {
-  readonly data: ReadonlyArray<DataSetData>
+  readonly data: readonly DataSetData[]
   readonly label: string
   readonly type: DatasetType
   readonly yAxisLabel: string

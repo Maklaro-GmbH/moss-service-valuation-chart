@@ -4,7 +4,7 @@ type Lazy<T> = T | PromiseLike<T>
 
 type Input<T> = Lazy<Iterable<Lazy<T>> | Lazy<AsyncIterable<Lazy<T>>>>
 
-async function accumulateInput(input: Input<string>): Promise<string> {
+async function accumulateInput (input: Input<string>): Promise<string> {
   let accumulator: string = ''
 
   for await (const chunk of await input) {
@@ -14,7 +14,7 @@ async function accumulateInput(input: Input<string>): Promise<string> {
   return accumulator
 }
 
-export async function generateChart(input: Input<string>) {
+export async function generateChart (input: Input<string>): Promise<Buffer> {
   const chart = new Chart(JSON.parse(await accumulateInput(input)))
 
   const result = await chart.get()
@@ -23,5 +23,6 @@ export async function generateChart(input: Input<string>) {
     return result
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-throw-literal
   throw result
 }

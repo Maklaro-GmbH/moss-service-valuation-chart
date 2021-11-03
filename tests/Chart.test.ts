@@ -1,5 +1,4 @@
 import Chart from '../src/Chart'
-import type { Payload } from '../src/schemas/payload'
 import oneLinePayload from './fixtures/payloads/one_line.json'
 import twoLinesPayload from './fixtures/payloads/two_lines.json'
 
@@ -11,7 +10,7 @@ describe(Chart, () => {
 
     it('should throw an error when range is not defined', function () {
       // @ts-expect-error
-      const result = () => chart.computeTickRange(data)
+      const result = (): ReturnType<Chart['computeTickRange']> => chart.computeTickRange(data)
       expect(result).toThrow('range must be defined')
     })
 
