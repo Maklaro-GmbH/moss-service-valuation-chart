@@ -61,9 +61,16 @@ export default class MossChart {
     return chartService
   }
 
+  /**
+   * @fixme `chart.defaults.font` is not a {@link ChartJS.Scriptable},
+   * introduced in {@link https://github.com/chartjs/Chart.js/pull/9680},
+   * let's hope it'll get fixed in a future release
+   *
+   * @see https://github.com/chartjs/Chart.js/blob/v3.6.0/docs/general/fonts.md
+   */
   private setServiceDefaults(chart: typeof ChartJS, styling: Styling) {
-    chart.defaults.font.family = this.getFontFamilyFromPath(styling.fontPath)
-    chart.defaults.font.size = styling.fontSize
+    ;(chart.defaults.font as ChartJS.FontSpec).family = this.getFontFamilyFromPath(styling.fontPath)
+    ;(chart.defaults.font as ChartJS.FontSpec).size = styling.fontSize
     chart.defaults.color = styling.textColor
     chart.defaults.devicePixelRatio = 2
   }
