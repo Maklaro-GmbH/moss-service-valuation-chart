@@ -1,4 +1,7 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion, @typescript-eslint/strict-boolean-expressions, @typescript-eslint/prefer-nullish-coalescing */
+/**
+ * disable eslint in this file to make future updates easier by leaving the code as is
+ */
+/* eslint-disable */
 import {
   Legend as LegendPlugin,
   Element,
@@ -7,13 +10,12 @@ import {
   Chart,
   ChartEvent,
   defaults,
-  // @ts-expect-error no type defs
+  // @ts-ignore no type defs
   helpers,
-  ChartType
+  ChartType,
 } from 'chart.js'
 
 declare module 'chart.js' {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface LegendOptions<TType extends ChartType> {
     /**
      * custom property
@@ -29,16 +31,16 @@ declare module 'chart.js' {
  */
 // @ts-expect-error `Element.prototype` does not accept generics
 declare class Legend extends Element<{}, LegendOptions<ChartType>> {
-  constructor (config: LegendOptions<ChartType>)
+  constructor(config: LegendOptions<ChartType>)
   _added: false
-  legendHitBoxes: Array<{ left: number, top: number, row: number, width: number, height: number }>
+  legendHitBoxes: { left: number; top: number; row: number; width: number; height: number }[]
   _hoveredItem: null
   doughnutMode: false
   chart: Chart
   options: LegendOptions<ChartType>
   ctx: CanvasRenderingContext2D
   legendItems?: LegendItem[]
-  columnSizes?: Array<{ height: number, width: number }>
+  columnSizes?: { height: number; width: number }[]
   lineWidths?: number[]
   maxHeight?: number
   maxWidth?: number
@@ -52,20 +54,20 @@ declare class Legend extends Element<{}, LegendOptions<ChartType>> {
   position: undefined
   weight: undefined
   fullSize: undefined
-  update (maxWidth: this['maxWidth'], maxHeight: this['maxHeight'], margins: this['_margins']): void
-  setDimensions (): void
-  buildLabels (): void
-  fit (): void
-  _fitRows (titleHeight: number, fontSize: number, boxWidth: number, itemHeight: number): number
-  _fitCols (titleHeight: number, fontSize: number, boxWidth: number, itemHeight: number): number
-  adjustHitBoxes (): void
-  isHorizontal (): boolean
-  draw (): void
-  _draw (): void
-  drawTitle (): void
-  _computeTitleHeight (): number
-  _getLegendItemAt (x: number, y: number): LegendItem | null
-  handleEvent (e: ChartEvent): void
+  update(maxWidth: this['maxWidth'], maxHeight: this['maxHeight'], margins: this['_margins']): void
+  setDimensions(): void
+  buildLabels(): void
+  fit(): void
+  _fitRows(titleHeight: number, fontSize: number, boxWidth: number, itemHeight: number): number
+  _fitCols(titleHeight: number, fontSize: number, boxWidth: number, itemHeight: number): number
+  adjustHitBoxes(): void
+  isHorizontal(): boolean
+  draw(): void
+  _draw(): void
+  drawTitle(): void
+  _computeTitleHeight(): number
+  _getLegendItemAt(x: number, y: number): LegendItem | null
+  handleEvent(e: ChartEvent): void
 }
 
 const PrivateLegend = (LegendPlugin as unknown as { readonly _element: typeof Legend })._element
@@ -73,7 +75,7 @@ const PrivateLegend = (LegendPlugin as unknown as { readonly _element: typeof Le
 const originalPrivateDrawMethod = PrivateLegend.prototype._draw
 const originalPrivateFitMethod = PrivateLegend.prototype.fit
 
-export function overwriteLegendMethods (): void {
+export function overwriteLegendMethods() {
   const {
     valueOrDefault,
     toFont,
@@ -88,15 +90,11 @@ export function overwriteLegendMethods (): void {
     _textX
   } = helpers
 
-  function getBoxSize (
+  function getBoxSize(
     labelOpts: LegendOptions<ChartType>['labels'],
     fontSize: number,
     pointLineLength: LegendOptions<ChartType>['pointLineLength']
-  ): {
-      readonly boxWidth: number
-      readonly boxHeight: number
-      readonly itemHeight: number
-    } {
+  ) {
     let { boxHeight = fontSize, boxWidth = fontSize } = labelOpts
 
     if (labelOpts.usePointStyle) {
@@ -113,9 +111,9 @@ export function overwriteLegendMethods (): void {
   }
 
   /**
-   * the internal `fit` method with some changes regarding drawing point lines
+   * the internal `fit` mthod with some changes regarding drawing point lines
    */
-  PrivateLegend.prototype.fit = function fit (this: Legend) {
+  PrivateLegend.prototype.fit = function fit(this: Legend) {
     const { options, ctx } = this
 
     // The legend may not be displayed for a variety of reasons including
@@ -151,9 +149,9 @@ export function overwriteLegendMethods (): void {
   }
 
   /**
-   * the internal `_draw` method with some changes regarding drawing point lines
+   * the internal `_draw` mthod with some changes regarding drawing point lines
    */
-  PrivateLegend.prototype._draw = function _draw () {
+  PrivateLegend.prototype._draw = function _draw() {
     const { options: opts, columnSizes, lineWidths, ctx } = this
     const { align, labels: labelOpts } = opts
     const defaultColor = defaults.color
@@ -162,7 +160,7 @@ export function overwriteLegendMethods (): void {
     const { color: fontColor, padding } = labelOpts
     const fontSize = labelFont.size
     const halfFontSize = fontSize / 2
-    let cursor: { x: number, y: number, line: number }
+    let cursor: { x: number; y: number; line: number }
 
     this.drawTitle()
 
@@ -179,7 +177,7 @@ export function overwriteLegendMethods (): void {
     )
 
     // current position
-    const drawLegendBox = (x: number, y: number, legendItem: LegendItem): void => {
+    const drawLegendBox = (x: number, y: number, legendItem: LegendItem) => {
       if (isNaN(boxWidth) || boxWidth <= 0 || isNaN(boxHeight) || boxHeight < 0) {
         return
       }
@@ -241,7 +239,7 @@ export function overwriteLegendMethods (): void {
       ctx.restore()
     }
 
-    const fillText = (x: number, y: number, legendItem: LegendItem): void => {
+    const fillText = (x: number, y: number, legendItem: LegendItem) => {
       renderText(ctx, legendItem.text, x, y + itemHeight / 2, labelFont, {
         strikethrough: legendItem.hidden,
         textAlign: rtlHelper.textAlign(legendItem.textAlign)
@@ -334,7 +332,7 @@ export function overwriteLegendMethods (): void {
   }
 }
 
-export function restoreDefaultLegendMethods (): void {
+export function restoreDefaultLegendMethods() {
   PrivateLegend.prototype.fit = originalPrivateFitMethod
   PrivateLegend.prototype._draw = originalPrivateDrawMethod
 }
