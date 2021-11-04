@@ -4,7 +4,6 @@ import ChartJS, {
   Chart,
   ChartDataset,
   LegendItem,
-  CartesianScaleOptions,
   Scale
 } from 'chart.js'
 import { validate } from 'jsonschema'
@@ -34,21 +33,18 @@ export default class MossChart {
    * @param payload raw payload, passed value is validated internally
    * @throws when provided {@link payload} is invalid
    */
-  constructor(payload: unknown) {
+  constructor (payload: unknown) {
     this.assertPayloadSchema(payload)
 
     this.chartService = this.createChartService(payload)
     this.chartServicePayload = this.formChartServicePayload(payload)
   }
 
-  private assertPayloadSchema(req: unknown): asserts req is Payload {
-    const validationResult = validate(req, payloadSchema)
-    if (!validationResult.valid) {
-      throw validationResult.toString()
-    }
+  private assertPayloadSchema (req: unknown): asserts req is Payload {
+    validate(req, payloadSchema, { throwAll: true })
   }
 
-  private createChartService(req: Payload): ChartJSNodeCanvas {
+  private createChartService (req: Payload): ChartJSNodeCanvas {
     this.setServiceDefaults(ChartJS, req.styling)
 
     const chartService = new ChartJSNodeCanvas({
@@ -68,14 +64,14 @@ export default class MossChart {
    *
    * @see https://github.com/chartjs/Chart.js/blob/v3.6.0/docs/general/fonts.md
    */
-  private setServiceDefaults(chart: typeof ChartJS, styling: Styling) {
-    ;(chart.defaults.font as ChartJS.FontSpec).family = this.getFontFamilyFromPath(styling.fontPath)
-    ;(chart.defaults.font as ChartJS.FontSpec).size = styling.fontSize
+  private setServiceDefaults (chart: typeof ChartJS, styling: Styling): void {
+    (chart.defaults.font as ChartJS.FontSpec).family = this.getFontFamilyFromPath(styling.fontPath);
+    (chart.defaults.font as ChartJS.FontSpec).size = styling.fontSize
     chart.defaults.color = styling.textColor
     chart.defaults.devicePixelRatio = 2
   }
 
-  public formChartServicePayload(req: Payload): ChartConfiguration {
+  public formChartServicePayload (req: Payload): ChartConfiguration {
     const datasets = this.transformDatasets(req.data.datasets, req.styling.lineColor)
 
     const objectComputedFromRequest: ChartConfiguration = {
@@ -174,7 +170,7 @@ export default class MossChart {
               includeBounds: false,
               autoSkipPadding: 20,
               major: { enabled: true },
-              callback(this: Scale, value, index, { length }) {
+              callback (this: Scale, value, index, { length }) {
                 // skip first and last element
                 if (index === 0 || index === length - 1) {
                   return undefined
@@ -204,8 +200,8 @@ export default class MossChart {
     return objectComputedFromRequest
   }
 
-  private formLinearScalesFromDataSets(
-    datasets: ReadonlyArray<PayloadDataset>
+  private formLinearScalesFromDataSets (
+    datasets: readonly PayloadDataset[]
   ): Required<Required<ChartConfiguration>['options']>['scales'] {
     const valueRanges = {
       purchase: 100000,
@@ -222,6 +218,7 @@ export default class MossChart {
           { yAxisLabel, type, data },
           index
         ): Required<Required<ChartConfiguration>['options']>['scales'] => {
+          // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
           const position = index % 2 ? 'right' : 'left'
           return {
             [`y-axis-${index}`]: {
@@ -262,8 +259,9 @@ export default class MossChart {
               title: {
                 display: true,
                 text: yAxisLabel,
-                align: index % 2 ? 'start' : 'end' // this property does not exists in type definitions
-              } as CartesianScaleOptions['title'] & { readonly align?: 'start' | 'center' | 'end' }
+                // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+                align: index % 2 ? 'start' : 'end'
+              }
             }
           }
         }
@@ -271,7 +269,11 @@ export default class MossChart {
     )
   }
 
-  public computeTickRange(data: ReadonlyArray<DataSetData>, range: number) {
+  public computeTickRange (data: readonly DataSetData[], range: number): {
+    readonly min: number
+    readonly max: number
+  } {
+    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions, @typescript-eslint/no-throw-literal
     if (!range) throw 'range must be defined'
     const values = data.map(({ y }) => y)
     let max = Math.ceil(Math.max(...values) / range) * range
@@ -288,16 +290,17 @@ export default class MossChart {
   /**
    * transforms the payload dataset into chart datasets (y axis values)
    */
-  private transformDatasets(
-    datasets: ReadonlyArray<PayloadDataset>,
+  private transformDatasets (
+    datasets: readonly PayloadDataset[],
     borderColor: Styling['lineColor']
-  ): ChartDataset<'line'>[] {
+  ): Array<ChartDataset<'line'>> {
     return datasets.map(({ yAxisLabel, type, ...dataset }, index): ChartDataset<'line'> => {
       const defaultDatasetProps = {
         [DatasetType.Purchase]: purchaseDatasetProps,
         [DatasetType.Rental]: rentalDatasetProps
       } as const
       const typeRelatedAdditionalProps = defaultDatasetProps[type]
+      // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions, @typescript-eslint/no-throw-literal
       if (!typeRelatedAdditionalProps) throw `Unknown dataset type: ${JSON.stringify(type)}`
 
       return {
@@ -308,7 +311,7 @@ export default class MossChart {
         data: dataset.data.map((data) => data.y),
         borderColor,
         yAxisID: `y-axis-${index}`,
-        xAxisID: `x-axis`
+        xAxisID: 'x-axis'
       }
     })
   }
@@ -316,20 +319,20 @@ export default class MossChart {
   /**
    * registers the payload's font in provided chart canvas
    */
-  private registerFont(canvasService: ChartJSNodeCanvas, { styling: { fontPath } }: Payload) {
+  private registerFont (canvasService: ChartJSNodeCanvas, { styling: { fontPath } }: Payload): void {
     canvasService.registerFont(fontPath, { family: this.getFontFamilyFromPath(fontPath) })
   }
 
   /**
    * @returns rendered chart
    */
-  public get(mime: MimeType = 'image/png'): Promise<Buffer> {
-    return this.chartService.renderToBuffer(this.chartServicePayload, mime)
+  public async get (mime: MimeType = 'image/png'): Promise<Buffer> {
+    return await this.chartService.renderToBuffer(this.chartServicePayload, mime)
   }
 
-  private getFontFamilyFromPath(path: string): string {
-    const parsedPath = pathParse(path)
+  private getFontFamilyFromPath (path: string): string {
+    const { name } = pathParse(path)
 
-    return parsedPath.name || 'font-family'
+    return name.length > 0 ? name : 'font-family'
   }
 }

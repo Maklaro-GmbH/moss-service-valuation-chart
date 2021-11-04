@@ -1,3 +1,7 @@
+/**
+ * disable eslint in this file to make future updates easier by leaving the code as is
+ */
+/* eslint-disable */
 import {
   Legend as LegendPlugin,
   Element,
