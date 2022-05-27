@@ -16,5 +16,9 @@ jobs:
         run: docker-compose -f docker-compose.yml up -d
       - name: Install dependencies
         run: docker-compose run node yarn install --frozen-lockfile
-      - name: Run tests
-        run: docker-compose run node yarn test
+      - name: Linting
+        run: docker-compose run node yarn lint
+      - name: Tests
+        run: |
+          docker-compose run node yarn pretest
+          docker-compose run node yarn test
