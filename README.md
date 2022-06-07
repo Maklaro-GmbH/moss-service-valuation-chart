@@ -18,6 +18,7 @@ docker-compose run --rm --user 1000:1000 node bin/chart-valuation-service [json]
 ## Test the service
 
 ```bash
+docker-compose run --rm --user 1000:1000 node yarn install --frozen-lockfile
 docker-compose run --rm --user 1000:1000 node bin/chart-valuation-service < tests/fixtures/payloads/one_line.json > chart_1.png
 docker-compose run --rm --user 1000:1000 node bin/chart-valuation-service < tests/fixtures/payloads/two_lines.json > chart_2.png
 ```

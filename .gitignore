@@ -1,4 +1,5 @@
 ### webpack bundle ###
+/build
 /node_modules/
 /public/build/
 npm-debug.log

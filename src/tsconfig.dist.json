@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json.schemastore.org/tsconfig",
+  "extends": "./../tsconfig.json",
+  "ts-node": {
+    "transpileOnly": true
+  },
+  "include": [
+    "./",
+  ],
+  "compilerOptions": {
+    "outDir": "./../build",
+    "noEmit": false
+  }
+}
