@@ -2,11 +2,16 @@
 
 Contains chart-node-canvas ChartJS implementation.
 
-## Docker
+## Install Dependencies
 
 ```bash
 docker-compose build
 docker-compose run --rm --user 1000:1000 node yarn install --frozen-lockfile
+```
+
+## Update dependencies
+```bash
+docker-compose run --rm --user 1000:1000 node yarn upgrade-interactive --latest
 ```
 
 ## Run bin exec file
