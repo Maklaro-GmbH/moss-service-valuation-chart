@@ -1,4 +1,4 @@
-FROM node:18.19.0
+FROM node:20.1.4
 
 # install system packages needed to manually build "canvas" dependency. (pre-built is not available to download anymore)
 RUN apt-get update

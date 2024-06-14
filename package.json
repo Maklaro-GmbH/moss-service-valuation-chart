@@ -20,9 +20,9 @@
   },
   "homepage": "https://github.com/Maklaro-GmbH/moss-service-valuation-chart#readme",
   "dependencies": {
-    "@tsconfig/node18": "^1.0.3",
+    "@tsconfig/node20": "^20.1.4",
     "chart.js": "^3.9.1",
-    "chartjs-node-canvas": "^4.1.6",
+    "chartjs-node-canvas": "https://github.com/Maklaro-GmbH/ChartjsNodeCanvas#master",
     "jsonschema": "^1.4.1",
     "typescript": "~5.3.3"
   },
@@ -35,7 +35,7 @@
     "ts-standard": "^12.0.2"
   },
   "engines": {
-    "node": "^18.19.0"
+    "node": "^20.14.0"
   },
   "jest": {
     "preset": "ts-jest",
