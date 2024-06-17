@@ -1,6 +1,6 @@
 {
   "name": "moss-service-valuation-chart",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "description": "Valuation chart generator for MOSS",
   "scripts": {
     "pretest": "ts-standard && tsc",
