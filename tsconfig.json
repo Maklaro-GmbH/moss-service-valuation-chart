@@ -1,6 +1,6 @@
 {
   "$schema": "http://json.schemastore.org/tsconfig",
-  "extends": "@tsconfig/node18/tsconfig.json",
+  "extends": "@tsconfig/node20/tsconfig.json",
   "ts-node": {
     "transpileOnly": true
   },
@@ -13,6 +13,13 @@
     "noEmit": true,
     "allowJs": true,
     "checkJs": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "module": "commonjs",
+    "target": "es2022",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node"
   }
 }
