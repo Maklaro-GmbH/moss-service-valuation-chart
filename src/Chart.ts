@@ -171,11 +171,6 @@ export default class MossChart {
               autoSkipPadding: 20,
               major: { enabled: true },
               callback (this: Scale, value, index, { length }) {
-                // skip first and last element
-                if (index === 0 || index === length - 1) {
-                  return undefined
-                }
-
                 if (typeof value === 'number') {
                   return this.getLabelForValue(value)
                 }
