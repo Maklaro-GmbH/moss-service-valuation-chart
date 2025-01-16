@@ -2,23 +2,25 @@ name: Build
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main]
   pull_request:
-    branches: [ main, develop ]
+    types: [opened, reopened, synchronize, ready_for_review]
 
 jobs:
   test:
+    name: test
     runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Start docker containers
-        run: docker-compose -f docker-compose.yml up -d
+        run: docker compose -f docker-compose.yml up -d
       - name: Install dependencies
-        run: docker-compose run node yarn install --frozen-lockfile
+        run: docker compose run node yarn install --frozen-lockfile
       - name: Linting
-        run: docker-compose run node yarn lint
+        run: docker compose run node yarn lint
       - name: Tests
         run: |
-          docker-compose run node yarn pretest
-          docker-compose run node yarn test
+          docker compose run node yarn pretest
+          docker compose run node yarn test
