@@ -15,12 +15,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Start docker containers
-        run: docker-compose -f docker-compose.yml up -d
+        run: docker compose -f docker-compose.yml up -d
       - name: Install dependencies
-        run: docker-compose run node yarn install --frozen-lockfile
+        run: docker compose run node yarn install --frozen-lockfile
       - name: Linting
-        run: docker-compose run node yarn lint
+        run: docker compose run node yarn lint
       - name: Tests
         run: |
-          docker-compose run node yarn pretest
-          docker-compose run node yarn test
+          docker compose run node yarn pretest
+          docker compose run node yarn test
