@@ -1,15 +1,12 @@
 import { ChartJSNodeCanvas, MimeType } from 'chartjs-node-canvas'
 import ChartJS, {
   ChartConfiguration,
-  Chart,
   ChartDataset,
   LegendItem,
   Scale
 } from 'chart.js'
 import { validate } from 'jsonschema'
 import { parse as pathParse } from 'path'
-import makeTicksPlugin from './plugins/ticks'
-import { overwriteLegendMethods } from './plugins/legend'
 import purchaseDatasetProps from './config/purchaseDatasetProps'
 import rentalDatasetProps from './config/rentalDatasetProps'
 import {
@@ -20,9 +17,6 @@ import {
   DataSetData,
   DatasetType
 } from './schemas/payload'
-
-overwriteLegendMethods()
-Chart.register(makeTicksPlugin({ scaleName: 'x-axis' }))
 
 export default class MossChart {
   private readonly chartService: ChartJSNodeCanvas
@@ -94,7 +88,7 @@ export default class MossChart {
             display: true,
             position: 'bottom',
             align: 'end',
-            pointLineLength: 50,
+            // pointLineLength: 50,
             labels: {
               usePointStyle: true,
               font: {
@@ -153,7 +147,6 @@ export default class MossChart {
             position: 'bottom',
             grid: {
               display: false,
-              drawBorder: true,
               drawOnChartArea: true,
               tickWidth: 1,
               lineWidth: 1,
