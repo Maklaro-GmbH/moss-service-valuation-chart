@@ -103,6 +103,7 @@ export default class MossChart {
               },
               color: req.styling.textColor,
               padding: 40,
+              pointStyleWidth: 80,
               generateLabels: () =>
                 datasets.map(
                   (dataset, index): LegendItem => ({
@@ -176,10 +177,18 @@ export default class MossChart {
                 }
 
                 return value
+              },
+              font: {
+                size: req.styling.fontSize,
+                family: this.getFontFamilyFromPath(req.styling.fontPath)
               }
             },
             title: {
-              color: req.styling.textColor
+              color: req.styling.textColor,
+              font: {
+                size: req.styling.fontSize,
+                family: this.getFontFamilyFromPath(req.styling.fontPath)
+              }
             }
           },
           ...this.formLinearScalesFromDataSets(req.data.datasets)
