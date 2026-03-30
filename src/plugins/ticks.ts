@@ -1,8 +1,45 @@
-import type {
-  Plugin
-} from 'chart.js'
+import type { Plugin } from 'chart.js'
 
-export default function makeTicksPlugin (
+interface GridLineItem {
+  readonly tx1: number
+  readonly ty1: number
+  readonly tx2: number
+  readonly ty2: number
+  readonly x1: number
+  readonly y1: number
+  readonly x2: number
+  readonly y2: number
+  readonly width: number
+  readonly color: string
+  readonly borderDash: readonly number[]
+  readonly borderDashOffset: number
+  readonly tickWidth: number
+  readonly tickColor: string
+  readonly tickBorderDash: readonly number[]
+  readonly tickBorderDashOffset: number
+  readonly tickLength?: number
+}
+
+interface LabelSizeItem {
+  readonly width: number
+  readonly height: number
+}
+
+interface LabelSizes {
+  readonly first: LabelSizeItem
+  readonly last: LabelSizeItem
+  readonly widest: LabelSizeItem
+  readonly highest: LabelSizeItem
+  readonly widths: readonly number[]
+  readonly heights: readonly number[]
+}
+
+/**
+ * This plugin uses some knowledge gained from reading the Chart.js source code.
+ * Especially the `core.scale.js` file, good luck upgrading it.
+ * @see {@link https://github.com/chartjs/Chart.js/blob/9c5cf9fac7ec04a71b516e2aff3f7d76876be369/src/core/core.scale.js core.scale.js}
+ */
+export function makeTicksPlugin (
   { scaleName }: { readonly scaleName: string }
 ): Plugin {
   return {
@@ -18,18 +55,19 @@ export default function makeTicksPlugin (
 
       const { ctx } = scale
 
-      const labelItems = scale.getLabelItems()
+      const gridLineItems = (scale as any)
+        ._gridLineItems as readonly GridLineItem[]
+      const labelSizes = (scale as any)._getLabelSizes() as LabelSizes
 
-      for (let index = 0; index < labelItems.length; index++) {
-        // @ts-expect-error
-        const gridLine = scale._gridLineItems[index]
-        // @ts-expect-error
-        const height = gridLine.tickLength as number ?? scale._labelSizes.heights[index] as number
+      for (let index = 0; index < gridLineItems.length; index++) {
+        const gridLine = gridLineItems[index]
+        const height = gridLine.tickLength ??
+          labelSizes.highest.height
 
         // draw vertical tick line
         ctx.beginPath()
-        ctx.moveTo(gridLine.x2, gridLine.y2 as number - height / 2)
-        ctx.lineTo(gridLine.x2, gridLine.y2 as number + height / 2)
+        ctx.moveTo(gridLine.x2, gridLine.y2 - height / 2)
+        ctx.lineTo(gridLine.x2, gridLine.y2 + height / 2)
         ctx.lineWidth = gridLine.tickWidth
         ctx.strokeStyle = gridLine.tickColor
         ctx.lineCap = 'butt'

@@ -10,13 +10,14 @@ import { parse as pathParse } from 'path'
 import purchaseDatasetProps from './config/purchaseDatasetProps'
 import rentalDatasetProps from './config/rentalDatasetProps'
 import {
-  payloadSchema,
-  Payload,
-  Styling,
-  PayloadDataset,
   DataSetData,
-  DatasetType
+  DatasetType,
+  Payload,
+  PayloadDataset,
+  payloadSchema,
+  Styling
 } from './schemas/payload'
+import { makeTicksPlugin } from './plugins/ticks'
 
 export default class MossChart {
   private readonly chartService: ChartJSNodeCanvas
@@ -59,14 +60,18 @@ export default class MossChart {
    * @see https://github.com/chartjs/Chart.js/blob/v3.6.0/docs/general/fonts.md
    */
   private setServiceDefaults (chart: typeof ChartJS, styling: Styling): void {
-    (chart.defaults.font as ChartJS.FontSpec).family = this.getFontFamilyFromPath(styling.fontPath);
+    (chart.defaults.font as ChartJS.FontSpec).family = this
+      .getFontFamilyFromPath(styling.fontPath);
     (chart.defaults.font as ChartJS.FontSpec).size = styling.fontSize
     chart.defaults.color = styling.textColor
     chart.defaults.devicePixelRatio = 2
   }
 
   public formChartServicePayload (req: Payload): ChartConfiguration {
-    const datasets = this.transformDatasets(req.data.datasets, req.styling.lineColor)
+    const datasets = this.transformDatasets(
+      req.data.datasets,
+      req.styling.lineColor
+    )
 
     const objectComputedFromRequest: ChartConfiguration = {
       type: 'line',
@@ -74,6 +79,9 @@ export default class MossChart {
         labels: Array.from(req.data.labels),
         datasets
       },
+      plugins: [
+        makeTicksPlugin({ scaleName: 'x-axis' })
+      ],
       options: {
         layout: {
           padding: {
@@ -100,41 +108,41 @@ export default class MossChart {
               generateLabels: () =>
                 datasets.map(
                   (dataset, index): LegendItem => ({
-                    borderRadius:
-                      typeof dataset.pointRadius === 'number' ? dataset.pointRadius : undefined,
+                    borderRadius: typeof dataset.pointRadius === 'number'
+                      ? dataset.pointRadius
+                      : undefined,
                     datasetIndex: dataset.order ?? index,
                     fontColor: req.styling.textColor,
-                    lineCap:
-                      typeof dataset.borderCapStyle === 'string'
-                        ? dataset.borderCapStyle
-                        : undefined,
-                    lineDash: (Array.isArray as (arg: unknown) => arg is number[])(
-                      dataset.borderDash
-                    )
-                      ? dataset.borderDash
+                    lineCap: typeof dataset.borderCapStyle === 'string'
+                      ? dataset.borderCapStyle
                       : undefined,
-                    lineDashOffset:
-                      typeof dataset.borderDashOffset === 'number'
-                        ? dataset.borderDashOffset
+                    lineDash:
+                      (Array.isArray as (arg: unknown) => arg is number[])(
+                        dataset.borderDash
+                      )
+                        ? dataset.borderDash
                         : undefined,
+                    lineDashOffset: typeof dataset.borderDashOffset === 'number'
+                      ? dataset.borderDashOffset
+                      : undefined,
                     /**
                      * length of the line is impossible to configure via options
                      * @see https://github.com/chartjs/Chart.js/blob/v3.3.2/src/plugins/plugin.legend.js#L16
                      * {@link overwriteLegendMethods}
                      */
-                    lineWidth:
-                      typeof dataset.borderWidth === 'number' ? dataset.borderWidth : undefined,
-                    pointStyle:
-                      typeof dataset.pointStyle === 'string' ? dataset.pointStyle : undefined,
-                    strokeStyle:
-                      typeof dataset.borderColor === 'string'
-                        ? dataset.borderColor
-                        : req.styling.lineColor,
+                    lineWidth: typeof dataset.borderWidth === 'number'
+                      ? dataset.borderWidth
+                      : undefined,
+                    pointStyle: typeof dataset.pointStyle === 'string'
+                      ? dataset.pointStyle
+                      : undefined,
+                    strokeStyle: typeof dataset.borderColor === 'string'
+                      ? dataset.borderColor
+                      : req.styling.lineColor,
                     text: dataset.label ?? '',
-                    lineJoin:
-                      typeof dataset.borderJoinStyle === 'string'
-                        ? dataset.borderJoinStyle
-                        : undefined
+                    lineJoin: typeof dataset.borderJoinStyle === 'string'
+                      ? dataset.borderJoinStyle
+                      : undefined
                   })
                 )
             }
@@ -163,6 +171,7 @@ export default class MossChart {
               includeBounds: false,
               autoSkipPadding: 20,
               major: { enabled: true },
+              align: 'center',
               callback (this: Scale, value, index, { length }) {
                 if (typeof value === 'number') {
                   return this.getLabelForValue(value)
@@ -282,40 +291,52 @@ export default class MossChart {
     datasets: readonly PayloadDataset[],
     borderColor: Styling['lineColor']
   ): Array<ChartDataset<'line'>> {
-    return datasets.map(({ yAxisLabel, type, ...dataset }, index): ChartDataset<'line'> => {
-      const defaultDatasetProps = {
-        [DatasetType.Purchase]: purchaseDatasetProps,
-        [DatasetType.Rental]: rentalDatasetProps
-      } as const
-      const typeRelatedAdditionalProps = defaultDatasetProps[type]
-      // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions, @typescript-eslint/no-throw-literal
-      if (!typeRelatedAdditionalProps) throw `Unknown dataset type: ${JSON.stringify(type)}`
+    return datasets.map(
+      ({ yAxisLabel, type, ...dataset }, index): ChartDataset<'line'> => {
+        const defaultDatasetProps = {
+          [DatasetType.Purchase]: purchaseDatasetProps,
+          [DatasetType.Rental]: rentalDatasetProps
+        } as const
+        const typeRelatedAdditionalProps = defaultDatasetProps[type]
+        // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+        if (!typeRelatedAdditionalProps) {
+          throw new Error(`Unknown dataset type: ${JSON.stringify(type)}`)
+        }
 
-      return {
-        ...typeRelatedAdditionalProps,
-        cubicInterpolationMode: 'monotone',
-        tension: 0.4,
-        label: dataset.label,
-        data: dataset.data.map((data) => data.y),
-        borderColor,
-        yAxisID: `y-axis-${index}`,
-        xAxisID: 'x-axis'
+        return {
+          ...typeRelatedAdditionalProps,
+          cubicInterpolationMode: 'monotone',
+          tension: 0.4,
+          label: dataset.label,
+          data: dataset.data.map((data) => data.y),
+          borderColor,
+          yAxisID: `y-axis-${index}`,
+          xAxisID: 'x-axis'
+        }
       }
-    })
+    )
   }
 
   /**
    * registers the payload's font in provided chart canvas
    */
-  private registerFont (canvasService: ChartJSNodeCanvas, { styling: { fontPath } }: Payload): void {
-    canvasService.registerFont(fontPath, { family: this.getFontFamilyFromPath(fontPath) })
+  private registerFont (
+    canvasService: ChartJSNodeCanvas,
+    { styling: { fontPath } }: Payload
+  ): void {
+    canvasService.registerFont(fontPath, {
+      family: this.getFontFamilyFromPath(fontPath)
+    })
   }
 
   /**
    * @returns rendered chart
    */
   public async get (mime: MimeType = 'image/png'): Promise<Buffer> {
-    return await this.chartService.renderToBuffer(this.chartServicePayload, mime)
+    return await this.chartService.renderToBuffer(
+      this.chartServicePayload,
+      mime
+    )
   }
 
   private getFontFamilyFromPath (path: string): string {
