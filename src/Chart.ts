@@ -60,9 +60,8 @@ export default class MossChart {
    * @see https://github.com/chartjs/Chart.js/blob/v3.6.0/docs/general/fonts.md
    */
   private setServiceDefaults (chart: typeof ChartJS, styling: Styling): void {
-    (chart.defaults.font as ChartJS.FontSpec).family = this
-      .getFontFamilyFromPath(styling.fontPath);
-    (chart.defaults.font as ChartJS.FontSpec).size = styling.fontSize
+    chart.defaults.font.family = this.getFontFamilyFromPath(styling.fontPath)
+    chart.defaults.font.size = styling.fontSize
     chart.defaults.color = styling.textColor
     chart.defaults.devicePixelRatio = 2
   }
@@ -96,12 +95,11 @@ export default class MossChart {
             display: true,
             position: 'bottom',
             align: 'end',
-            // pointLineLength: 50,
             labels: {
               usePointStyle: true,
               font: {
                 size: req.styling.fontSize,
-                family: req.styling.fontPath
+                family: this.getFontFamilyFromPath(req.styling.fontPath)
               },
               color: req.styling.textColor,
               padding: 40,
