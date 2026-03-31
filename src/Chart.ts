@@ -95,9 +95,14 @@ export default class MossChart {
             display: true,
             position: 'bottom',
             align: 'end',
+            fullSize: true,
             labels: {
               usePointStyle: true,
               font: {
+                /**
+                 * @notice there's possibly a bug, this font size is not always the same as other font sizes for some reason,
+                 *   despite being actually the same value from the config payload
+                 */
                 size: req.styling.fontSize,
                 family: this.getFontFamilyFromPath(req.styling.fontPath)
               },
