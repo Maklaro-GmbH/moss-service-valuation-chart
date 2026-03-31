@@ -37,6 +37,7 @@ interface LabelSizes {
 /**
  * This plugin uses some knowledge gained from reading the Chart.js source code.
  * Especially the `core.scale.js` file, good luck upgrading it.
+ * Technically tick is a part of the grid line, but it can't be drawn when the grid lines are disabled.
  * @see {@link https://github.com/chartjs/Chart.js/blob/9c5cf9fac7ec04a71b516e2aff3f7d76876be369/src/core/core.scale.js core.scale.js}
  */
 export function makeTicksPlugin (
