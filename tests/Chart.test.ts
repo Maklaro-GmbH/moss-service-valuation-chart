@@ -1,6 +1,6 @@
 import Chart from '../src/Chart'
-import oneLinePayload from './fixtures/payloads/one_line.json'
-import twoLinesPayload from './fixtures/payloads/two_lines.json'
+import oneLinePayload from './fixtures/payloads/one_line'
+import twoLinesPayload from './fixtures/payloads/two_lines'
 
 describe(Chart, () => {
   const chart = new Chart(oneLinePayload)

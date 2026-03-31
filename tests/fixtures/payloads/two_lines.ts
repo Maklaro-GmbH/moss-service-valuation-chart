@@ -1,0 +1,102 @@
+import { DatasetType, Payload } from '../../../src/schemas/payload'
+import { join, resolve } from 'path'
+
+export default {
+  width: 800,
+  height: 250,
+  styling: {
+    fontPath: resolve(join(__dirname, '..', 'fonts', 'Value-Regular.ttf')),
+    fontSize: 12,
+    textColor: '#000',
+    lineColor: '#0e74b6',
+    gridColor: '#000'
+  },
+  data: {
+    labels: [
+      '06.2018',
+      '09.2018',
+      '12.2018',
+      '03.2019',
+      '06.2019',
+      '09.2019',
+      '12.2019',
+      '03.2020'
+    ],
+    datasets: [
+      {
+        label: 'Kaufpreisentwicklung',
+        yAxisLabel: 'Kaufpreis in \u20ac',
+        type: DatasetType.Purchase,
+        data: [
+          {
+            date: '06.2018',
+            y: 636000
+          },
+          {
+            date: '09.2018',
+            y: 649000
+          },
+          {
+            date: '12.2018',
+            y: 661000
+          },
+          {
+            date: '03.2019',
+            y: 673000
+          },
+          {
+            date: '06.2019',
+            y: 680000
+          },
+          {
+            date: '09.2019',
+            y: 720000
+          },
+          {
+            date: '12.2019',
+            y: 725000
+          },
+          {
+            date: '03.2020',
+            y: 728000
+          }
+        ]
+      },
+      {
+        label: 'Mietpreisentwicklung',
+        yAxisLabel: 'Mietpreis pro m\u00b2 in \u20ac',
+        type: DatasetType.Rental,
+        data: [
+          {
+            date: '06.2018',
+            y: 3.73
+          },
+          {
+            date: '09.2018',
+            y: 4.13
+          },
+          {
+            date: '12.2018',
+            y: 4.17
+          },
+          {
+            date: '03.2019',
+            y: 4.2
+          },
+          {
+            date: '06.2019',
+            y: 4.33
+          },
+          {
+            date: '09.2019',
+            y: 4.3
+          },
+          {
+            date: '12.2019',
+            y: 4.44
+          }
+        ]
+      }
+    ]
+  }
+} satisfies Payload

@@ -1,4 +1,4 @@
-import type { CartesianScaleOptions, Plugin, Scale, TextAlign, FontSpec } from 'chart.js'
+import type { Plugin } from 'chart.js'
 
 interface GridLineItem {
   readonly tx1: number
@@ -11,59 +11,59 @@ interface GridLineItem {
   readonly y2: number
   readonly width: number
   readonly color: string
-  readonly borderDash: readonly unknown[]
+  readonly borderDash: readonly number[]
   readonly borderDashOffset: number
   readonly tickWidth: number
   readonly tickColor: string
-  readonly tickBorderDash: readonly unknown[]
-  readonly tickBorderDashOffset: unknown
+  readonly tickBorderDash: readonly number[]
+  readonly tickBorderDashOffset: number
   readonly tickLength?: number
 }
 
-interface LabelItem {
-  readonly rotation: number
-  readonly label: number
-  readonly font: FontSpec & { readonly string: string }
-  readonly color: string
-  readonly strokeColor: string
-  readonly strokeWidth: number
-  readonly textOffset: number
-  readonly textAlign: TextAlign
-  readonly textBaseline: CanvasTextBaseline
-  readonly translation: readonly unknown[]
-  readonly backdrop: undefined
+interface LabelSizeItem {
+  readonly width: number
+  readonly height: number
 }
 
-interface LabelSize {
-  readonly first: Readonly<Record<'width' | 'height', number>>
-  readonly last: Readonly<Record<'width' | 'height', number>>
-  readonly widest: Readonly<Record<'width' | 'height', number>>
-  readonly highest: Readonly<Record<'width' | 'height', number>>
+interface LabelSizes {
+  readonly first: LabelSizeItem
+  readonly last: LabelSizeItem
+  readonly widest: LabelSizeItem
+  readonly highest: LabelSizeItem
   readonly widths: readonly number[]
   readonly heights: readonly number[]
 }
 
-interface AfterDrawScale extends Scale<CartesianScaleOptions> {
-  readonly _gridLineItems: readonly GridLineItem[]
-  readonly _labelItems: readonly LabelItem[]
-  readonly _labelSizes: LabelSize
-}
-
-export default function makeTicksPlugin ({ scaleName }: { readonly scaleName: string }): Plugin {
+/**
+ * This plugin uses some knowledge gained from reading the Chart.js source code.
+ * Especially the `core.scale.js` file, good luck upgrading it.
+ * Technically tick is a part of the grid line, but it can't be drawn when the grid lines are disabled.
+ * @see {@link https://github.com/chartjs/Chart.js/blob/9c5cf9fac7ec04a71b516e2aff3f7d76876be369/src/core/core.scale.js core.scale.js}
+ */
+export function makeTicksPlugin (
+  { scaleName }: { readonly scaleName: string }
+): Plugin {
   return {
     id: 'ticks-plugin',
     afterDraw (chart) {
-      const scale = chart.scales[scaleName] as AfterDrawScale | undefined
+      const scale = chart.scales[scaleName]
 
       if (scale == null) {
-        throw new Error(`chart scale named ${JSON.stringify(scaleName)} does not exists`)
+        throw new Error(
+          `chart scale named ${JSON.stringify(scaleName)} does not exists`
+        )
       }
 
       const { ctx } = scale
 
-      for (let index = 0; index < scale._labelItems.length; index++) {
-        const gridLine = scale._gridLineItems[index]
-        const height = gridLine.tickLength ?? scale._labelSizes.heights[index]
+      const gridLineItems = (scale as any)
+        ._gridLineItems as readonly GridLineItem[]
+      const labelSizes = (scale as any)._getLabelSizes() as LabelSizes
+
+      for (let index = 0; index < gridLineItems.length; index++) {
+        const gridLine = gridLineItems[index]
+        const height = gridLine.tickLength ??
+          labelSizes.highest.height
 
         // draw vertical tick line
         ctx.beginPath()
