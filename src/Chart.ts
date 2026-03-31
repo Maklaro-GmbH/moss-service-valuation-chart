@@ -103,6 +103,9 @@ export default class MossChart {
               },
               color: req.styling.textColor,
               padding: 40,
+              /**
+               * length of the line is indirectly influenced by this property
+               */
               pointStyleWidth: 80,
               generateLabels: () =>
                 datasets.map(
@@ -124,11 +127,6 @@ export default class MossChart {
                     lineDashOffset: typeof dataset.borderDashOffset === 'number'
                       ? dataset.borderDashOffset
                       : undefined,
-                    /**
-                     * length of the line is impossible to configure via options
-                     * @see https://github.com/chartjs/Chart.js/blob/v3.3.2/src/plugins/plugin.legend.js#L16
-                     * {@link overwriteLegendMethods}
-                     */
                     lineWidth: typeof dataset.borderWidth === 'number'
                       ? dataset.borderWidth
                       : undefined,
