@@ -99,17 +99,13 @@ export default class MossChart {
             labels: {
               usePointStyle: true,
               font: {
-                /**
-                 * @notice there's possibly a bug, this font size is not always the same as other font sizes for some reason,
-                 *   despite being actually the same value from the config payload
-                 */
                 size: req.styling.fontSize,
                 family: this.getFontFamilyFromPath(req.styling.fontPath)
               },
               color: req.styling.textColor,
               padding: 40,
               /**
-               * length of the line is indirectly influenced by this property
+               * length of the line is influenced by this property
                */
               pointStyleWidth: 80,
               generateLabels: () =>
