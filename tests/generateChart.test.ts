@@ -7,7 +7,7 @@ describe(generateChart, () => {
 
   it('should pass on valid input', async () => {
     await expect(
-      generateChart(JSON.stringify(await import('./fixtures/payloads/one_line.json')))
+      generateChart(JSON.stringify((await import('./fixtures/payloads/one_line')).default))
     ).resolves.toBeInstanceOf(Buffer)
   })
 })
