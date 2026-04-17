@@ -764,10 +764,10 @@
   dependencies:
     "@types/istanbul-lib-report" "*"
 
-"@types/jest-image-snapshot@^4.3.1":
-  version "4.3.2"
-  resolved "https://registry.yarnpkg.com/@types/jest-image-snapshot/-/jest-image-snapshot-4.3.2.tgz#dcf1e977e550354d36f27fdd17307ab846033005"
-  integrity sha512-bJCAD1KO8bzdSmHfN+sGy6LIoHcNFA9/zRyzjQ+gJ5CZRcp9F9I5Sjl3/v1ndnyFpH22XCGVj+CUCteaXRwl3A==
+"@types/jest-image-snapshot@^6.4.1":
+  version "6.4.1"
+  resolved "https://registry.yarnpkg.com/@types/jest-image-snapshot/-/jest-image-snapshot-6.4.1.tgz#a64c4faf782ba466193563bda082017ecbaaa0cf"
+  integrity sha512-pj3Sdc7Cx5mMLUttPprazSDQCur2cr512Dm38e9aAHI55LDxEhqdyqzK9myC4EmEy7sPAF2nGJ8zifX4qso7sQ==
   dependencies:
     "@types/jest" "*"
     "@types/pixelmatch" "*"
@@ -2773,9 +2773,9 @@ jest-haste-map@^29.7.0:
     fsevents "^2.3.2"
 
 jest-image-snapshot@^6.4.0:
-  version "6.4.0"
-  resolved "https://registry.yarnpkg.com/jest-image-snapshot/-/jest-image-snapshot-6.4.0.tgz#65831d13beb1680f3bba9fb28230fa53d76939be"
-  integrity sha512-IWGtSOnelwaVPd09STbJuLmnAwlBC/roJtTLGLb8M3TA0vfku3MRNEXmljTa1EMXqdRbA0oIWiqHFB1ttTGazQ==
+  version "6.5.2"
+  resolved "https://registry.yarnpkg.com/jest-image-snapshot/-/jest-image-snapshot-6.5.2.tgz#5bd4ffd36d14f590a3a6264c35a069fe2bc8395d"
+  integrity sha512-frenWThr5ddnnokcX5N4gwi41hA5TiUOdhv/JoGcJrOaktHjrk4/7XbiHKW52lgKX+vei6QkRlgM7fkYQ15nPg==
   dependencies:
     chalk "^4.0.0"
     get-stdin "^5.0.1"
@@ -2783,7 +2783,6 @@ jest-image-snapshot@^6.4.0:
     lodash "^4.17.4"
     pixelmatch "^5.1.0"
     pngjs "^3.4.0"
-    rimraf "^2.6.2"
     ssim.js "^3.1.1"
 
 jest-leak-detector@^29.7.0:
@@ -3754,13 +3753,6 @@ reusify@^1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/reusify/-/reusify-1.0.4.tgz#90da382b1e126efc02146e90845a88db12925d76"
   integrity sha512-U9nH88a3fc/ekCF1l0/UP1IosiuIjyTh7hBvXVMHYgVcfGvt897Xguj2UOLDeI5BG2m7/uwyaLVT6fbtCwTyzw==
-
-rimraf@^2.6.2:
-  version "2.7.1"
-  resolved "https://registry.yarnpkg.com/rimraf/-/rimraf-2.7.1.tgz#35797f13a7fdadc566142c29d4f07ccad483e3ec"
-  integrity sha512-uWjbaKIK3T1OSVptzX7Nl6PvQ3qAGtKEtVRjRuazjfL3Bx5eI409VZSqgND+4UNnmzLVdPj9FqFJNPqBZFve4w==
-  dependencies:
-    glob "^7.1.3"
 
 rimraf@^3.0.2:
   version "3.0.2"
