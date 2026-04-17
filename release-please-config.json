@@ -63,6 +63,9 @@
       "hidden": false
     }
   ],
+  "include-component-in-tag": false,
+  "include-v-in-release-name": true,
+  "include-v-in-tag": true,
   "draft-pull-request": true,
   "packages": {
     ".": {}
