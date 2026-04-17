@@ -1,9 +1,11 @@
-import { ChartJSNodeCanvas, MimeType } from 'chartjs-node-canvas'
-import ChartJS, {
+import { Canvas, ExportFormat, ExportOptions, FontLibrary } from 'skia-canvas'
+import {
+  Chart,
   ChartConfiguration,
   ChartDataset,
   LegendItem,
-  Scale
+  Scale,
+  registerables
 } from 'chart.js'
 import { validate } from 'jsonschema'
 import { parse as pathParse } from 'path'
@@ -19,8 +21,12 @@ import {
 } from './schemas/payload'
 import { makeTicksPlugin } from './plugins/ticks'
 
+Chart.register(...registerables)
+
 export default class MossChart {
-  private readonly chartService: ChartJSNodeCanvas
+  private static readonly DPR = 2
+
+  private readonly canvas: Canvas
 
   private readonly chartServicePayload: ChartConfiguration
 
@@ -31,25 +37,29 @@ export default class MossChart {
   constructor (payload: unknown) {
     this.assertPayloadSchema(payload)
 
-    this.chartService = this.createChartService(payload)
+    this.canvas = this.createCanvas(payload)
     this.chartServicePayload = this.formChartServicePayload(payload)
+    this.setChartJSDefaults(Chart, payload.styling)
+    this.registerFont(payload)
   }
 
   private assertPayloadSchema (req: unknown): asserts req is Payload {
     validate(req, payloadSchema, { throwAll: true })
   }
 
-  private createChartService (req: Payload): ChartJSNodeCanvas {
-    this.setServiceDefaults(ChartJS, req.styling)
+  private createCanvas (req: Payload): Canvas {
+    const canvas = new Canvas(
+      Math.round(req.width / MossChart.DPR),
+      Math.round(req.height / MossChart.DPR),
+      {
+        // freeze the default
+        textContrast: 0,
+        // freeze the default
+        textGamma: 1.4
+      }
+    )
 
-    const chartService = new ChartJSNodeCanvas({
-      width: req.width,
-      height: req.height
-    })
-
-    this.registerFont(chartService, req)
-
-    return chartService
+    return canvas
   }
 
   /**
@@ -59,11 +69,11 @@ export default class MossChart {
    *
    * @see https://github.com/chartjs/Chart.js/blob/v3.6.0/docs/general/fonts.md
    */
-  private setServiceDefaults (chart: typeof ChartJS, styling: Styling): void {
+  private setChartJSDefaults (chart: typeof Chart, styling: Styling): void {
     chart.defaults.font.family = this.getFontFamilyFromPath(styling.fontPath)
     chart.defaults.font.size = styling.fontSize
     chart.defaults.color = styling.textColor
-    chart.defaults.devicePixelRatio = 2
+    chart.defaults.devicePixelRatio = MossChart.DPR
   }
 
   public formChartServicePayload (req: Payload): ChartConfiguration {
@@ -327,22 +337,28 @@ export default class MossChart {
    * registers the payload's font in provided chart canvas
    */
   private registerFont (
-    canvasService: ChartJSNodeCanvas,
     { styling: { fontPath } }: Payload
   ): void {
-    canvasService.registerFont(fontPath, {
-      family: this.getFontFamilyFromPath(fontPath)
-    })
+    FontLibrary.use(
+      this.getFontFamilyFromPath(fontPath),
+      fontPath
+    )
   }
 
   /**
    * @returns rendered chart
    */
-  public async get (mime: MimeType = 'image/png'): Promise<Buffer> {
-    return await this.chartService.renderToBuffer(
-      this.chartServicePayload,
-      mime
+  public async get (format: ExportFormat = 'png', options?: ExportOptions): Promise<Buffer> {
+    const chart = new Chart(
+      this.canvas as any,
+      this.chartServicePayload
     )
+
+    try {
+      return await this.canvas.toBuffer(format, options)
+    } finally {
+      chart.destroy()
+    }
   }
 
   private getFontFamilyFromPath (path: string): string {

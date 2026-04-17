@@ -2,6 +2,7 @@
   "name": "moss-service-valuation-chart",
   "version": "2.0.0",
   "description": "Valuation chart generator for MOSS",
+  "private": true,
   "scripts": {
     "pretest": "ts-standard && tsc",
     "test": "jest",
@@ -22,7 +23,7 @@
   "dependencies": {
     "@tsconfig/node24": "^24.0.0",
     "chart.js": "^4.5.0",
-    "chartjs-node-canvas": "^5.0.0",
+    "skia-canvas": "^3.0.0",
     "jsonschema": "^1.4.1",
     "typescript": "~5.9.0"
   },
