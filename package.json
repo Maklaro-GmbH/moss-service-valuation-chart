@@ -2,7 +2,9 @@
   "name": "moss-service-valuation-chart",
   "version": "1.9.0",
   "description": "Valuation chart generator for MOSS",
+  "private": true,
   "scripts": {
+    "pretest": "ts-standard && tsc",
     "test": "jest",
     "lint": "ts-standard",
     "lint:fix": "ts-standard --fix",

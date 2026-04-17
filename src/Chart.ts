@@ -8,8 +8,6 @@ import {
   registerables
 } from 'chart.js'
 import { validate } from 'jsonschema'
-
-Chart.register(...registerables)
 import { parse as pathParse } from 'path'
 import purchaseDatasetProps from './config/purchaseDatasetProps'
 import rentalDatasetProps from './config/rentalDatasetProps'
@@ -22,6 +20,8 @@ import {
   Styling
 } from './schemas/payload'
 import { makeTicksPlugin } from './plugins/ticks'
+
+Chart.register(...registerables)
 
 export default class MossChart {
   private static readonly DPR = 2
