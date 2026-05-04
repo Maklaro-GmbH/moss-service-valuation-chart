@@ -9,8 +9,8 @@ updates:
       interval: "monthly"
     versioning-strategy: increase-if-necessary
     commit-message:
-      prefix: "deps"
-      prefix-development: "deps"
+      prefix: "build"
+      prefix-development: "build"
     groups:
       "babel":
         patterns:

@@ -1,6 +1,5 @@
 {
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
-  "bootstrap-sha": "559cb33f6b0d966438031c4ecb3b50f1c0e71e70",
   "changelog-sections": [
     {
       "type": "feat",
@@ -34,7 +33,7 @@
     },
     {
       "type": "chore",
-      "section": "Miscellaneous Chores",
+      "section": "Chores",
       "hidden": false
     },
     {
@@ -49,17 +48,17 @@
     },
     {
       "type": "deps",
-      "section": "Dependencies",
+      "section": "Builds",
       "hidden": false
     },
     {
       "type": "build",
-      "section": "Build System",
+      "section": "Builds",
       "hidden": false
     },
     {
       "type": "ci",
-      "section": "Continuous Integration",
+      "section": "Continuous Integrations",
       "hidden": false
     }
   ],
