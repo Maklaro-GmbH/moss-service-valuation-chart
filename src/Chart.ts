@@ -1,25 +1,32 @@
-import { Canvas, ExportFormat, ExportOptions, FontLibrary } from 'skia-canvas'
+import { parse as pathParse } from 'node:path'
+
 import {
   Chart,
-  ChartConfiguration,
-  ChartDataset,
-  LegendItem,
-  Scale,
-  registerables
+  type ChartConfiguration,
+  type ChartDataset,
+  type LegendItem,
+  registerables,
+  type Scale,
 } from 'chart.js'
 import { validate } from 'jsonschema'
-import { parse as pathParse } from 'path'
+import {
+  Canvas,
+  type ExportFormat,
+  type ExportOptions,
+  FontLibrary,
+} from 'skia-canvas'
+
 import purchaseDatasetProps from './config/purchaseDatasetProps'
 import rentalDatasetProps from './config/rentalDatasetProps'
-import {
-  DataSetData,
-  DatasetType,
-  Payload,
-  PayloadDataset,
-  payloadSchema,
-  Styling
-} from './schemas/payload'
 import { makeTicksPlugin } from './plugins/ticks'
+import {
+  type DataSetData,
+  DatasetType,
+  type Payload,
+  type PayloadDataset,
+  payloadSchema,
+  type Styling,
+} from './schemas/payload'
 
 Chart.register(...registerables)
 
@@ -34,7 +41,7 @@ export default class MossChart {
    * @param payload raw payload, passed value is validated internally
    * @throws when provided {@link payload} is invalid
    */
-  constructor (payload: unknown) {
+  constructor(payload: unknown) {
     this.assertPayloadSchema(payload)
 
     this.canvas = this.createCanvas(payload)
@@ -43,11 +50,11 @@ export default class MossChart {
     this.registerFont(payload)
   }
 
-  private assertPayloadSchema (req: unknown): asserts req is Payload {
+  private assertPayloadSchema(req: unknown): asserts req is Payload {
     validate(req, payloadSchema, { throwAll: true })
   }
 
-  private createCanvas (req: Payload): Canvas {
+  private createCanvas(req: Payload): Canvas {
     const canvas = new Canvas(
       Math.round(req.width / MossChart.DPR),
       Math.round(req.height / MossChart.DPR),
@@ -55,8 +62,8 @@ export default class MossChart {
         // freeze the default
         textContrast: 0,
         // freeze the default
-        textGamma: 1.4
-      }
+        textGamma: 1.4,
+      },
     )
 
     return canvas
@@ -69,36 +76,34 @@ export default class MossChart {
    *
    * @see https://github.com/chartjs/Chart.js/blob/v3.6.0/docs/general/fonts.md
    */
-  private setChartJSDefaults (chart: typeof Chart, styling: Styling): void {
+  private setChartJSDefaults(chart: typeof Chart, styling: Styling): void {
     chart.defaults.font.family = this.getFontFamilyFromPath(styling.fontPath)
     chart.defaults.font.size = styling.fontSize
     chart.defaults.color = styling.textColor
     chart.defaults.devicePixelRatio = MossChart.DPR
   }
 
-  public formChartServicePayload (req: Payload): ChartConfiguration {
+  public formChartServicePayload(req: Payload): ChartConfiguration {
     const datasets = this.transformDatasets(
       req.data.datasets,
-      req.styling.lineColor
+      req.styling.lineColor,
     )
 
     const objectComputedFromRequest: ChartConfiguration = {
       type: 'line',
       data: {
         labels: Array.from(req.data.labels),
-        datasets
+        datasets,
       },
-      plugins: [
-        makeTicksPlugin({ scaleName: 'x-axis' })
-      ],
+      plugins: [makeTicksPlugin({ scaleName: 'x-axis' })],
       options: {
         layout: {
           padding: {
             /**
              * when there is only one line/dataset that chart is bounded to the right side of the canvas
              */
-            right: req.data.datasets.length === 1 ? 25 : undefined
-          }
+            right: req.data.datasets.length === 1 ? 25 : undefined,
+          },
         },
         plugins: {
           legend: {
@@ -110,7 +115,7 @@ export default class MossChart {
               usePointStyle: true,
               font: {
                 size: req.styling.fontSize,
-                family: this.getFontFamilyFromPath(req.styling.fontPath)
+                family: this.getFontFamilyFromPath(req.styling.fontPath),
               },
               color: req.styling.textColor,
               padding: 40,
@@ -121,40 +126,46 @@ export default class MossChart {
               generateLabels: () =>
                 datasets.map(
                   (dataset, index): LegendItem => ({
-                    borderRadius: typeof dataset.pointRadius === 'number'
-                      ? dataset.pointRadius
-                      : undefined,
+                    borderRadius:
+                      typeof dataset.pointRadius === 'number'
+                        ? dataset.pointRadius
+                        : undefined,
                     datasetIndex: dataset.order ?? index,
                     fontColor: req.styling.textColor,
-                    lineCap: typeof dataset.borderCapStyle === 'string'
-                      ? dataset.borderCapStyle
-                      : undefined,
-                    lineDash:
-                      (Array.isArray as (arg: unknown) => arg is number[])(
-                        dataset.borderDash
-                      )
-                        ? dataset.borderDash
+                    lineCap:
+                      typeof dataset.borderCapStyle === 'string'
+                        ? dataset.borderCapStyle
                         : undefined,
-                    lineDashOffset: typeof dataset.borderDashOffset === 'number'
-                      ? dataset.borderDashOffset
+                    lineDash: (
+                      Array.isArray as (arg: unknown) => arg is number[]
+                    )(dataset.borderDash)
+                      ? dataset.borderDash
                       : undefined,
-                    lineWidth: typeof dataset.borderWidth === 'number'
-                      ? dataset.borderWidth
-                      : undefined,
-                    pointStyle: typeof dataset.pointStyle === 'string'
-                      ? dataset.pointStyle
-                      : undefined,
-                    strokeStyle: typeof dataset.borderColor === 'string'
-                      ? dataset.borderColor
-                      : req.styling.lineColor,
+                    lineDashOffset:
+                      typeof dataset.borderDashOffset === 'number'
+                        ? dataset.borderDashOffset
+                        : undefined,
+                    lineWidth:
+                      typeof dataset.borderWidth === 'number'
+                        ? dataset.borderWidth
+                        : undefined,
+                    pointStyle:
+                      typeof dataset.pointStyle === 'string'
+                        ? dataset.pointStyle
+                        : undefined,
+                    strokeStyle:
+                      typeof dataset.borderColor === 'string'
+                        ? dataset.borderColor
+                        : req.styling.lineColor,
                     text: dataset.label ?? '',
-                    lineJoin: typeof dataset.borderJoinStyle === 'string'
-                      ? dataset.borderJoinStyle
-                      : undefined
-                  })
-                )
-            }
-          }
+                    lineJoin:
+                      typeof dataset.borderJoinStyle === 'string'
+                        ? dataset.borderJoinStyle
+                        : undefined,
+                  }),
+                ),
+            },
+          },
         },
         scales: {
           'x-axis': {
@@ -168,7 +179,7 @@ export default class MossChart {
               lineWidth: 1,
               color: req.styling.gridColor,
               tickColor: req.styling.gridColor,
-              tickLength: 10
+              tickLength: 10,
             },
             ticks: {
               display: true,
@@ -180,7 +191,7 @@ export default class MossChart {
               autoSkipPadding: 20,
               major: { enabled: true },
               align: 'center',
-              callback (this: Scale, value, index, { length }) {
+              callback(this: Scale, value) {
                 if (typeof value === 'number') {
                   return this.getLabelForValue(value)
                 }
@@ -189,36 +200,36 @@ export default class MossChart {
               },
               font: {
                 size: req.styling.fontSize,
-                family: this.getFontFamilyFromPath(req.styling.fontPath)
-              }
+                family: this.getFontFamilyFromPath(req.styling.fontPath),
+              },
             },
             title: {
               color: req.styling.textColor,
               font: {
                 size: req.styling.fontSize,
-                family: this.getFontFamilyFromPath(req.styling.fontPath)
-              }
-            }
+                family: this.getFontFamilyFromPath(req.styling.fontPath),
+              },
+            },
           },
-          ...this.formLinearScalesFromDataSets(req.data.datasets)
+          ...this.formLinearScalesFromDataSets(req.data.datasets),
         },
         elements: {
           point: {
-            radius: 0
-          }
-        }
-      }
+            radius: 0,
+          },
+        },
+      },
     }
 
     return objectComputedFromRequest
   }
 
-  private formLinearScalesFromDataSets (
-    datasets: readonly PayloadDataset[]
+  private formLinearScalesFromDataSets(
+    datasets: readonly PayloadDataset[],
   ): Required<Required<ChartConfiguration>['options']>['scales'] {
     const valueRanges = {
       purchase: 100000,
-      rental: 2
+      rental: 2,
     } as const
 
     /**
@@ -229,9 +240,8 @@ export default class MossChart {
       ...datasets.map(
         (
           { yAxisLabel, type, data },
-          index
+          index,
         ): Required<Required<ChartConfiguration>['options']>['scales'] => {
-          // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
           const position = index % 2 ? 'right' : 'left'
           return {
             [`y-axis-${index}`]: {
@@ -248,45 +258,46 @@ export default class MossChart {
                     return value
                       .toLocaleString(undefined, {
                         minimumFractionDigits: 0,
-                        maximumFractionDigits: 0
+                        maximumFractionDigits: 0,
                       })
                       .replace(/,/g, '.')
                   }
 
                   if (typeof value === 'number') {
                     if (value % 1 === 0) {
-                      return value.toString() + ',-'
+                      return `${value.toString()},-`
                     }
 
                     return value
                       .toLocaleString(undefined, {
                         minimumFractionDigits: 2,
-                        maximumFractionDigits: 2
+                        maximumFractionDigits: 2,
                       })
                       .replace('.', ',')
                   }
 
                   return value
-                }
+                },
               },
               title: {
                 display: true,
                 text: yAxisLabel,
-                // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-                align: index % 2 ? 'start' : 'end'
-              }
-            }
+                align: index % 2 ? 'start' : 'end',
+              },
+            },
           }
-        }
-      )
+        },
+      ),
     )
   }
 
-  public computeTickRange (data: readonly DataSetData[], range: number): {
+  public computeTickRange(
+    data: readonly DataSetData[],
+    range: number,
+  ): {
     readonly min: number
     readonly max: number
   } {
-    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions, @typescript-eslint/no-throw-literal
     if (!range) throw 'range must be defined'
     const values = data.map(({ y }) => y)
     let max = Math.ceil(Math.max(...values) / range) * range
@@ -303,18 +314,17 @@ export default class MossChart {
   /**
    * transforms the payload dataset into chart datasets (y axis values)
    */
-  private transformDatasets (
+  private transformDatasets(
     datasets: readonly PayloadDataset[],
-    borderColor: Styling['lineColor']
+    borderColor: Styling['lineColor'],
   ): Array<ChartDataset<'line'>> {
     return datasets.map(
       ({ yAxisLabel, type, ...dataset }, index): ChartDataset<'line'> => {
         const defaultDatasetProps = {
           [DatasetType.Purchase]: purchaseDatasetProps,
-          [DatasetType.Rental]: rentalDatasetProps
+          [DatasetType.Rental]: rentalDatasetProps,
         } as const
         const typeRelatedAdditionalProps = defaultDatasetProps[type]
-        // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
         if (!typeRelatedAdditionalProps) {
           throw new Error(`Unknown dataset type: ${JSON.stringify(type)}`)
         }
@@ -327,31 +337,29 @@ export default class MossChart {
           data: dataset.data.map((data) => data.y),
           borderColor,
           yAxisID: `y-axis-${index}`,
-          xAxisID: 'x-axis'
+          xAxisID: 'x-axis',
         }
-      }
+      },
     )
   }
 
   /**
    * registers the payload's font in provided chart canvas
    */
-  private registerFont (
-    { styling: { fontPath } }: Payload
-  ): void {
-    FontLibrary.use(
-      this.getFontFamilyFromPath(fontPath),
-      fontPath
-    )
+  private registerFont({ styling: { fontPath } }: Payload): void {
+    FontLibrary.use(this.getFontFamilyFromPath(fontPath), fontPath)
   }
 
   /**
    * @returns rendered chart
    */
-  public async get (format: ExportFormat = 'png', options?: ExportOptions): Promise<Buffer> {
+  public async get(
+    format: ExportFormat = 'png',
+    options?: ExportOptions,
+  ): Promise<Buffer> {
     const chart = new Chart(
-      this.canvas as any,
-      this.chartServicePayload
+      this.canvas.getContext('2d') as unknown as CanvasRenderingContext2D,
+      this.chartServicePayload,
     )
 
     try {
@@ -361,7 +369,7 @@ export default class MossChart {
     }
   }
 
-  private getFontFamilyFromPath (path: string): string {
+  private getFontFamilyFromPath(path: string): string {
     const { name } = pathParse(path)
 
     return name.length > 0 ? name : 'font-family'

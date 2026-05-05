@@ -6,7 +6,7 @@ const value: ChartDataset<'line'> = {
   pointStyle: 'line',
   pointRadius: 0,
   xAxisID: 'x-axis',
-  data: []
+  data: [],
 }
 
 export default value

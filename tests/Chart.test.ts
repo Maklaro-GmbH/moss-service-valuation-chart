@@ -5,22 +5,24 @@ import twoLinesPayload from './fixtures/payloads/two_lines'
 describe(Chart, () => {
   const chart = new Chart(oneLinePayload)
 
-  describe('computeTickRange', function () {
+  describe('computeTickRange', () => {
     const { data } = twoLinesPayload.data.datasets[0]
 
-    it('should throw an error when range is not defined', function () {
-      // @ts-expect-error
-      const result = (): ReturnType<Chart['computeTickRange']> => chart.computeTickRange(data)
+    it('should throw an error when range is not defined', () => {
+      const result = (): ReturnType<Chart['computeTickRange']> => {
+        // @ts-expect-error
+        return chart.computeTickRange(data)
+      }
       expect(result).toThrow('range must be defined')
     })
 
-    it('should return max value being first number divisible by 100000 greater than biggest number in the array', function () {
+    it('should return max value being first number divisible by 100000 greater than biggest number in the array', () => {
       const result = chart.computeTickRange(data, 100000)
       const expected = 800000
       expect(result.max).toEqual(expected)
     })
 
-    it('should return min value being first number divisible by 100000 smaller than smallest number in the array', function () {
+    it('should return min value being first number divisible by 100000 smaller than smallest number in the array', () => {
       const result = chart.computeTickRange(data, 100000)
       const expected = 600000
       expect(result.min).toEqual(expected)

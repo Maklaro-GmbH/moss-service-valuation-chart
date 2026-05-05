@@ -9,7 +9,7 @@ const value: ChartDataset<'line'> = {
   borderCapStyle: 'round',
   borderDash: [0, 10],
   borderDashOffset: 0,
-  data: []
+  data: [],
 }
 
 export default value

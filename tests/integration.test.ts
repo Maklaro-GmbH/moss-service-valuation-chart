@@ -1,5 +1,5 @@
 import Chart from '../src/Chart'
-import { Payload } from '../src/schemas/payload'
+import type { Payload } from '../src/schemas/payload'
 import fixtureMossOne from './fixtures/payloads/moss_one'
 import fixtureMossTwo from './fixtures/payloads/moss_two'
 import fixtureOneLine from './fixtures/payloads/one_line'
@@ -10,14 +10,11 @@ describe('chart generation integration', () => {
     ['moss_one.json', fixtureMossOne],
     ['moss_two.json', fixtureMossTwo],
     ['one_line.json', fixtureOneLine],
-    ['two_lines.json', fixtureTwoLines]
-  ])(
-    'should match the snapshot for %p',
-    async (_filename, fixture) => {
-      const chart = new Chart(fixture)
-      const chartBuffer = await chart.get()
+    ['two_lines.json', fixtureTwoLines],
+  ])('should match the snapshot for %p', async (_filename, fixture) => {
+    const chart = new Chart(fixture)
+    const chartBuffer = await chart.get()
 
-      expect(chartBuffer).toMatchImageSnapshot()
-    }
-  )
+    expect(chartBuffer).toMatchImageSnapshot()
+  })
 })

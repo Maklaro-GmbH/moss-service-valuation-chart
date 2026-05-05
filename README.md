@@ -1,11 +1,20 @@
 # Maklaro valuation-chart-service
 
-Contains chart-node-canvas ChartJS implementation.
+Contains skia-canvas ChartJS implementation.
+
+Using docker is advised as it is a reliable way of getting reproducible results across different environment.
+
+This app uses `yarn` as package manager.
+
+## Startup
+
+```bash
+docker compose build
+```
 
 ## Install Dependencies
 
 ```bash
-docker compose build
 docker compose run --rm --user 1000:1000 node yarn install --frozen-lockfile
 ```
 
@@ -28,7 +37,18 @@ docker compose run --rm --user 1000:1000 node bin/chart-valuation-service < test
 docker compose run --rm --user 1000:1000 node bin/chart-valuation-service < tests/fixtures/payloads/two_lines.json > chart_2.png
 ```
 
-## Run tests
+## Lint
+
+to check for errors:
+```bash
+docker compose run --rm --user 1000:1000 node yarn check
+```
+to fix errors:
+```bash
+docker compose run --rm --user 1000:1000 node yarn check:fix
+```
+
+## Run the tests
 
 ```bash
 docker compose run --rm --user 1000:1000 node yarn test
@@ -37,3 +57,9 @@ docker compose run --rm --user 1000:1000 node yarn test
 In order to generate the chart, pass JSON matching the schema from /src/schemas/payload.js
 
 You can find the example payloads in /tests/fixtures/payload
+
+## Shutdown / Cleanup
+
+```bash
+docker compose down
+```

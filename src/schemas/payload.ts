@@ -24,7 +24,7 @@ export interface DataSetData {
 
 export enum DatasetType {
   Purchase = 'purchase',
-  Rental = 'rental'
+  Rental = 'rental',
 }
 
 export interface Styling {
@@ -47,9 +47,9 @@ export const payloadSchema = {
         fontSize: { type: 'integer' },
         textColor: { type: 'string' },
         lineColor: { type: 'string' },
-        gridColor: { type: 'string' }
+        gridColor: { type: 'string' },
       },
-      required: ['fontPath', 'fontSize', 'textColor', 'lineColor', 'gridColor']
+      required: ['fontPath', 'fontSize', 'textColor', 'lineColor', 'gridColor'],
     },
     data: {
       type: 'object',
@@ -57,8 +57,8 @@ export const payloadSchema = {
         labels: {
           type: 'array',
           items: {
-            type: 'string'
-          }
+            type: 'string',
+          },
         },
         datasets: {
           type: 'array',
@@ -73,21 +73,21 @@ export const payloadSchema = {
                   type: 'object',
                   properties: {
                     date: { type: 'string' },
-                    y: { type: 'number' }
+                    y: { type: 'number' },
                   },
-                  required: ['y', 'date']
-                }
+                  required: ['y', 'date'],
+                },
               },
-              yAxisLabel: { type: 'string' }
+              yAxisLabel: { type: 'string' },
             },
-            required: ['label', 'type', 'data', 'yAxisLabel']
-          }
-        }
+            required: ['label', 'type', 'data', 'yAxisLabel'],
+          },
+        },
       },
-      required: ['labels', 'datasets']
-    }
+      required: ['labels', 'datasets'],
+    },
   },
-  required: ['width', 'height', 'styling', 'data']
+  required: ['width', 'height', 'styling', 'data'],
 } as const
 
 export default payloadSchema

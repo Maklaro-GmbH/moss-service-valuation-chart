@@ -1,4 +1,4 @@
-import type { Plugin } from 'chart.js'
+import type { Plugin, Scale } from 'chart.js'
 
 interface GridLineItem {
   readonly tx1: number
@@ -34,36 +34,41 @@ interface LabelSizes {
   readonly heights: readonly number[]
 }
 
+interface InternalScale extends Scale {
+  readonly _gridLineItems: readonly GridLineItem[]
+  _getLabelSizes(): LabelSizes
+}
+
 /**
  * This plugin uses some knowledge gained from reading the Chart.js source code.
  * Especially the `core.scale.js` file, good luck upgrading it.
  * Technically tick is a part of the grid line, but it can't be drawn when the grid lines are disabled.
  * @see {@link https://github.com/chartjs/Chart.js/blob/9c5cf9fac7ec04a71b516e2aff3f7d76876be369/src/core/core.scale.js core.scale.js}
  */
-export function makeTicksPlugin (
-  { scaleName }: { readonly scaleName: string }
-): Plugin {
+export function makeTicksPlugin({
+  scaleName,
+}: {
+  readonly scaleName: string
+}): Plugin {
   return {
     id: 'ticks-plugin',
-    afterDraw (chart) {
-      const scale = chart.scales[scaleName]
+    afterDraw(chart) {
+      const scale = chart.scales[scaleName] as InternalScale | null | undefined
 
-      if (scale == null) {
+      if (!scale) {
         throw new Error(
-          `chart scale named ${JSON.stringify(scaleName)} does not exists`
+          `chart scale named ${JSON.stringify(scaleName)} does not exists`,
         )
       }
 
       const { ctx } = scale
 
-      const gridLineItems = (scale as any)
-        ._gridLineItems as readonly GridLineItem[]
-      const labelSizes = (scale as any)._getLabelSizes() as LabelSizes
+      const gridLineItems = scale._gridLineItems
+      const labelSizes = scale._getLabelSizes()
 
       for (let index = 0; index < gridLineItems.length; index++) {
         const gridLine = gridLineItems[index]
-        const height = gridLine.tickLength ??
-          labelSizes.highest.height
+        const height = gridLine.tickLength ?? labelSizes.highest.height
 
         // draw vertical tick line
         ctx.beginPath()
@@ -75,6 +80,6 @@ export function makeTicksPlugin (
         ctx.stroke()
         ctx.restore()
       }
-    }
+    },
   }
 }
