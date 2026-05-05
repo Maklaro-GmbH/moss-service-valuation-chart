@@ -2,7 +2,7 @@
 
 Contains skia-canvas ChartJS implementation.
 
-Using docker is advised as it is a reliable way of getting reproducible results across different environment.
+Using docker is advised as it is a reliable way of getting reproducible results across different environments.
 
 This app uses `yarn` as package manager.
 
