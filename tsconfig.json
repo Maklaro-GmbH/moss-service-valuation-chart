@@ -4,10 +4,7 @@
   "ts-node": {
     "transpileOnly": true
   },
-  "include": [
-    "./src",
-    "./tests"
-  ],
+  "include": ["./src", "./tests"],
   "compilerOptions": {
     "lib": ["DOM"],
     "noEmit": true,

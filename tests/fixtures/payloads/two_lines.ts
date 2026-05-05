@@ -1,5 +1,6 @@
-import { DatasetType, Payload } from '../../../src/schemas/payload'
-import { join, resolve } from 'path'
+import { join, resolve } from 'node:path'
+
+import { DatasetType, type Payload } from '../../../src/schemas/payload'
 
 export default {
   width: 800,
@@ -9,7 +10,7 @@ export default {
     fontSize: 12,
     textColor: '#000',
     lineColor: '#0e74b6',
-    gridColor: '#000'
+    gridColor: '#000',
   },
   data: {
     labels: [
@@ -20,7 +21,7 @@ export default {
       '06.2019',
       '09.2019',
       '12.2019',
-      '03.2020'
+      '03.2020',
     ],
     datasets: [
       {
@@ -30,37 +31,37 @@ export default {
         data: [
           {
             date: '06.2018',
-            y: 636000
+            y: 636000,
           },
           {
             date: '09.2018',
-            y: 649000
+            y: 649000,
           },
           {
             date: '12.2018',
-            y: 661000
+            y: 661000,
           },
           {
             date: '03.2019',
-            y: 673000
+            y: 673000,
           },
           {
             date: '06.2019',
-            y: 680000
+            y: 680000,
           },
           {
             date: '09.2019',
-            y: 720000
+            y: 720000,
           },
           {
             date: '12.2019',
-            y: 725000
+            y: 725000,
           },
           {
             date: '03.2020',
-            y: 728000
-          }
-        ]
+            y: 728000,
+          },
+        ],
       },
       {
         label: 'Mietpreisentwicklung',
@@ -69,34 +70,34 @@ export default {
         data: [
           {
             date: '06.2018',
-            y: 3.73
+            y: 3.73,
           },
           {
             date: '09.2018',
-            y: 4.13
+            y: 4.13,
           },
           {
             date: '12.2018',
-            y: 4.17
+            y: 4.17,
           },
           {
             date: '03.2019',
-            y: 4.2
+            y: 4.2,
           },
           {
             date: '06.2019',
-            y: 4.33
+            y: 4.33,
           },
           {
             date: '09.2019',
-            y: 4.3
+            y: 4.3,
           },
           {
             date: '12.2019',
-            y: 4.44
-          }
-        ]
-      }
-    ]
-  }
+            y: 4.44,
+          },
+        ],
+      },
+    ],
+  },
 } satisfies Payload
