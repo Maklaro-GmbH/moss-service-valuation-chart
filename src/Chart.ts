@@ -298,7 +298,7 @@ export default class MossChart {
     readonly min: number
     readonly max: number
   } {
-    if (!range) throw 'range must be defined'
+    if (!range) throw new Error('range must be defined')
     const values = data.map(({ y }) => y)
     let max = Math.ceil(Math.max(...values) / range) * range
     let min = Math.ceil(Math.min(...values) / -range) * -range
