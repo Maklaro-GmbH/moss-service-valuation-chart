@@ -57,7 +57,7 @@ export function makeTicksPlugin({
 
       if (!scale) {
         throw new Error(
-          `chart scale named ${JSON.stringify(scaleName)} does not exists`,
+          `chart scale named ${JSON.stringify(scaleName)} does not exist`,
         )
       }
 
